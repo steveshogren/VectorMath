@@ -21,6 +21,7 @@
      to come from a domain that you own or have control over. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.android.lunarlander">
+<uses-sdk></uses-sdk>
     <application android:icon="@drawable/app_lunar_lander" android:label="@string/app_name">
         <activity android:name="LunarLander" android:theme="@android:style/Theme.NoTitleBar">
             <intent-filter>
@@ -28,5 +29,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <uses-library android:name="android.test.runner" android:required="true"></uses-library>
     </application>
 </manifest>

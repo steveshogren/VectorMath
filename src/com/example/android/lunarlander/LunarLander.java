@@ -1,19 +1,3 @@
-/*
- * Copyright (C) 2007 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.example.android.lunarlander;
 
 import android.app.Activity;
@@ -21,7 +5,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.Window;
 import android.widget.TextView;
 
 import com.example.android.lunarlander.LunarView.LunarThread;
@@ -36,18 +19,9 @@ import com.example.android.lunarlander.LunarView.LunarThread;
  * </ul>
  */
 public class LunarLander extends Activity {
-    private static final int MENU_EASY = 1;
-
-    private static final int MENU_HARD = 2;
-
-    private static final int MENU_MEDIUM = 3;
-
     private static final int MENU_PAUSE = 4;
-
     private static final int MENU_RESUME = 5;
-
     private static final int MENU_START = 6;
-
     private static final int MENU_STOP = 7;
 
     /** A handle to the thread that's actually running the animation. */
@@ -70,9 +44,6 @@ public class LunarLander extends Activity {
         menu.add(0, MENU_STOP, 0, R.string.menu_stop);
         menu.add(0, MENU_PAUSE, 0, R.string.menu_pause);
         menu.add(0, MENU_RESUME, 0, R.string.menu_resume);
-        menu.add(0, MENU_EASY, 0, R.string.menu_easy);
-        menu.add(0, MENU_MEDIUM, 0, R.string.menu_medium);
-        menu.add(0, MENU_HARD, 0, R.string.menu_hard);
 
         return true;
     }
@@ -99,15 +70,6 @@ public class LunarLander extends Activity {
                 return true;
             case MENU_RESUME:
                 mLunarThread.unpause();
-                return true;
-            case MENU_EASY:
-                mLunarThread.setDifficulty(LunarThread.DIFFICULTY_EASY);
-                return true;
-            case MENU_MEDIUM:
-                mLunarThread.setDifficulty(LunarThread.DIFFICULTY_MEDIUM);
-                return true;
-            case MENU_HARD:
-                mLunarThread.setDifficulty(LunarThread.DIFFICULTY_HARD);
                 return true;
         }
 

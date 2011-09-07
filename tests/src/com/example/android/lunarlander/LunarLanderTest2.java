@@ -7,7 +7,7 @@ import com.example.android.lunarlander.LunarLander;
  * Make sure that the main launcher activity opens up properly, which will be
  * verified by {@link #testActivityTestCaseSetUpProperly}.
  */
-public class LunarLanderTest extends ActivityInstrumentationTestCase2<LunarLander> {
+public class LunarLanderTest2 extends ActivityInstrumentationTestCase2<LunarLander> {
 
     /**
      * Creates an {@link ActivityInstrumentationTestCase2} for the {@link LunarLander} activity.
