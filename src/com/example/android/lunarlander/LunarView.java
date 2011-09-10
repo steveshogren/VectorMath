@@ -441,68 +441,70 @@ class LunarView extends SurfaceView implements SurfaceHolder.Callback {
 			canvas.drawPath(path, paint);
 			mFire = true;
 			if (mFire) {
-				LineDrawer lineDrawer = new LineDrawer(canvas);
-				drawFirstLine(lineDrawer);
+				LineDrawer lineDrawer = new RealLineDrawer(canvas, mLinePaint);
+				LaserCalculator calc = new LaserCalculator(lineDrawer, mCanvasWidth, mCanvasHeight);
+				calc.fireLaser(mDesiredDegrees);
+				
 				canvas.drawText("Degrees: " + mDesiredDegrees, 50, 50, mLinePaint);
 			}
 			canvas.restore();
 		}
 
-		private void drawFirstLine(LineDrawer lineDrawer) {
-			int xStart = mCanvasWidth / 2;
-			int yStart = mCanvasHeight;
-
-			int xEnd = 0;
-			int yEnd = 0;
-			
-			double degrees = Math.atan2(xStart, yStart) * 180.0F / Math.PI;
-			double maxLeftSideDegrees = 180 - (degrees + 90);
-			if (mDesiredDegrees < maxLeftSideDegrees) {
-				yEnd = (int) (mCanvasHeight - Math.tan(Math.toRadians(mDesiredDegrees))
-						* xStart);
-				lineDrawer.drawLine(xStart, yStart, xEnd, yEnd, mLinePaint);
-				headRightThenLeft(lineDrawer, xStart, yStart, xEnd, yEnd);
-			} else if (mDesiredDegrees < maxLeftSideDegrees + (180 - maxLeftSideDegrees * 2)) {
-				// hitting back wall
-			} else {
-				mDesiredDegrees  = 180 - (mDesiredDegrees + 90);
-				headRightThenLeft(lineDrawer, xStart, yStart, xStart, yStart);
-			}
-		}
-
-		private void headRightThenLeft(LineDrawer canvas, float xStart, float yStart, float xEnd,
-				float yEnd) {
-			// -----Heading right ---
-			xStart = xEnd;
-			yStart = yEnd;
-			yEnd = 0;
-
-			double nextAngle = 180 - (mDesiredDegrees + 90);
-			xEnd = (float) (Math.tan(Math.toRadians(nextAngle)) * yStart);
-			if (xEnd < mCanvasWidth) { // hitting back wall
-				canvas.drawLine(xStart, yStart, xEnd, yEnd, mLinePaint);
-			} else { // bounce off right wall
-				xEnd = mCanvasWidth;
-				yEnd = yStart - (float) (Math.tan(Math.toRadians(mDesiredDegrees)) * mCanvasWidth);
-				canvas.drawLine(xStart, yStart, xEnd, yEnd, mLinePaint);
-
-				// -----Heading left ----
-				xStart = xEnd;
-				yStart = yEnd;
-				xEnd = 0; // left wall
-				yEnd = 0; // back wall
-
-				yEnd = yStart - (float) (Math.tan(Math.toRadians(mDesiredDegrees)) * xStart);
-				if (yEnd > 0) { // left wall
-					canvas.drawLine(xStart, yStart, xEnd, yEnd, mLinePaint);
-					headRightThenLeft(canvas, xStart, yStart, xEnd, yEnd);
-				} else { // back wall
-					yEnd = 0;
-					xEnd = (float) (mCanvasWidth - Math.tan(Math.toRadians(nextAngle)) * yStart);
-					canvas.drawLine(xStart, yStart, xEnd, yEnd, mLinePaint);
-				}
-			}
-		}
+//		private void drawLine(LineDrawer lineDrawer) {
+//			int xStart = mCanvasWidth / 2;
+//			int yStart = mCanvasHeight;
+//
+//			int xEnd = 0;
+//			int yEnd = 0;
+//			
+//			double degrees = Math.atan2(xStart, yStart) * 180.0F / Math.PI;
+//			double maxLeftSideDegrees = 180 - (degrees + 90);
+//			if (mDesiredDegrees < maxLeftSideDegrees) {
+//				yEnd = (int) (mCanvasHeight - Math.tan(Math.toRadians(mDesiredDegrees))
+//						* xStart);
+//				lineDrawer.drawLine(xStart, yStart, xEnd, yEnd, mLinePaint);
+//				headRightThenLeft(lineDrawer, xStart, yStart, xEnd, yEnd);
+//			} else if (mDesiredDegrees < maxLeftSideDegrees + (180 - maxLeftSideDegrees * 2)) {
+//				// hitting back wall
+//			} else {
+//				mDesiredDegrees  = 180 - (mDesiredDegrees + 90);
+//				headRightThenLeft(lineDrawer, xStart, yStart, xStart, yStart);
+//			}
+//		}
+//
+//		private void headRightThenLeft(LineDrawer canvas, float xStart, float yStart, float xEnd,
+//				float yEnd) {
+//			// -----Heading right ---
+//			xStart = xEnd;
+//			yStart = yEnd;
+//			yEnd = 0;
+//
+//			double nextAngle = 180 - (mDesiredDegrees + 90);
+//			xEnd = (float) (Math.tan(Math.toRadians(nextAngle)) * yStart);
+//			if (xEnd < mCanvasWidth) { // hitting back wall
+//				canvas.drawLine(xStart, yStart, xEnd, yEnd, mLinePaint);
+//			} else { // bounce off right wall
+//				xEnd = mCanvasWidth;
+//				yEnd = yStart - (float) (Math.tan(Math.toRadians(mDesiredDegrees)) * mCanvasWidth);
+//				canvas.drawLine(xStart, yStart, xEnd, yEnd, mLinePaint);
+//
+//				// -----Heading left ----
+//				xStart = xEnd;
+//				yStart = yEnd;
+//				xEnd = 0; // left wall
+//				yEnd = 0; // back wall
+//
+//				yEnd = yStart - (float) (Math.tan(Math.toRadians(mDesiredDegrees)) * xStart);
+//				if (yEnd > 0) { // left wall
+//					canvas.drawLine(xStart, yStart, xEnd, yEnd, mLinePaint);
+//					headRightThenLeft(canvas, xStart, yStart, xEnd, yEnd);
+//				} else { // back wall
+//					yEnd = 0;
+//					xEnd = (float) (mCanvasWidth - Math.tan(Math.toRadians(nextAngle)) * yStart);
+//					canvas.drawLine(xStart, yStart, xEnd, yEnd, mLinePaint);
+//				}
+//			}
+//		}
 
 	}
 
