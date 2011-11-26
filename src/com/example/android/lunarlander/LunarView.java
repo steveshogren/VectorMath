@@ -91,7 +91,9 @@ class LunarView extends SurfaceView implements SurfaceHolder.Callback {
 		private Handler mHandler;
 
 		/** Paint to draw the lines on screen. */
-		private Paint mLinePaint;
+		private Paint mFiringLinePaint;
+
+		private Paint mTargetingLinePaint;
 
 		/** "Bad" speed-too-high variant of the line color. */
 		private Paint mLinePaintBad;
@@ -123,10 +125,15 @@ class LunarView extends SurfaceView implements SurfaceHolder.Callback {
 			// we don't need to transform it and it's faster to draw this way
 			mBackgroundImage = BitmapFactory.decodeResource(res, R.drawable.earthrise);
 			
-			// Initialize paints for speedometer
-			mLinePaint = new Paint();
-			mLinePaint.setAntiAlias(true);
-			mLinePaint.setARGB(255, 0, 255, 0);
+			mFiringLinePaint = new Paint();
+			mFiringLinePaint.setAntiAlias(true);
+			mFiringLinePaint.setColor(android.graphics.Color.RED);
+//			mFiringLinePaint.setARGB(255, 0, 255, 0);
+
+			mTargetingLinePaint = new Paint();
+			mTargetingLinePaint.setAntiAlias(true);
+			mTargetingLinePaint.setColor(android.graphics.Color.GREEN);
+//			mTargetingLinePaint.setARGB(255, 120, 180, 0);
 
 			mLinePaintBad = new Paint();
 			mLinePaintBad.setAntiAlias(true);
@@ -364,11 +371,13 @@ class LunarView extends SurfaceView implements SurfaceHolder.Callback {
 						fire();
 						return true;
 						// left/q -> left
-					} else if (keyCode == KeyEvent.KEYCODE_DPAD_UP || keyCode == KeyEvent.KEYCODE_Q) {
-						mDesiredDegrees++;
+					} else if (keyCode == KeyEvent.KEYCODE_DPAD_UP || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+						if (mDesiredDegrees < 175) {
+							mDesiredDegrees++;
+						}
 						return true;
 						// right/w -> right
-					} else if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+					} else if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN || keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
 						if (mDesiredDegrees > 5) {
 							mDesiredDegrees--;
 						}
@@ -421,7 +430,7 @@ class LunarView extends SurfaceView implements SurfaceHolder.Callback {
 			canvas.drawBitmap(mBackgroundImage, 0, 0, null);
 
 			mScratchRect.set(108, 4, 208, 14);
-			canvas.drawRect(mScratchRect, mLinePaint);
+			canvas.drawRect(mScratchRect, mFiringLinePaint);
 
 			Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
@@ -439,19 +448,16 @@ class LunarView extends SurfaceView implements SurfaceHolder.Callback {
 			path.close();
 
 			canvas.drawPath(path, paint);
-			mFire = true;
-			if (mFire) {
-				LineDrawer lineDrawer = new RealLineDrawer(canvas, mLinePaint);
+				LineDrawer lineDrawer = new RealLineDrawer(canvas, mFiringLinePaint, mTargetingLinePaint);
 				LaserCalculator calc = new LaserCalculator(lineDrawer, mCanvasWidth, mCanvasHeight);
 				try {
-					calc.fireLaser(mDesiredDegrees);
+					calc.fireLaser(mDesiredDegrees, mFire);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				
-				canvas.drawText("Degrees: " + mDesiredDegrees, 50, 50, mLinePaint);
-			}
+				canvas.drawText("Degrees: " + mDesiredDegrees, 50, 50, mFiringLinePaint);
 			canvas.restore();
 		}
 	}

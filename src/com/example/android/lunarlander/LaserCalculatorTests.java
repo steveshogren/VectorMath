@@ -4,92 +4,77 @@ import junit.framework.TestCase;
 import static org.mockito.Mockito.*;
 
 public class LaserCalculatorTests extends TestCase {
-	public void test45Degrees() throws Exception {
-		LineDrawer mockLine = mock(LineDrawer.class);
-		LaserCalculator lCalc = new LaserCalculator(mockLine, 100, 100);
-		
-		lCalc.fireLaser(45);
+	private LineDrawer mMockLine;
+	private LaserCalculator mCalc;
 	
-		verify(mockLine).drawLine(50, 100, 0, 50);
-		verify(mockLine).drawLine(0, 50, 50, 0);
+	public void setUp() {
+		mMockLine = mock(LineDrawer.class);
+		mCalc = new LaserCalculator(mMockLine, 100, 100);
+	}
+	
+	public void test45Degrees() {
+		mCalc.fireLaser(45, true);
+		verify(mMockLine).drawLine(50, 100, 0, 50, true);
+		verify(mMockLine).drawLine(0, 50, 50, 0, true);
 	}
 
-	public void test35Degrees() throws Exception {
-		LineDrawer mockLine = mock(LineDrawer.class);
-		LaserCalculator lCalc = new LaserCalculator(mockLine, 100, 100);
-		
-		lCalc.fireLaser(35);
-	
-		verify(mockLine).drawLine(50, 100, 0, 64);
-		verify(mockLine).drawLine(0, 64, (float) 91.401474, 0);
+	public void test35Degrees() {
+		mCalc.fireLaser(35, true);
+		verify(mMockLine).drawLine(50, 100, 0, 64, true);
+		verify(mMockLine).drawLine(0, 64, (float) 91.401474, 0, true);
 	}
 	
-	public void test5Degrees() throws Exception {
-		LineDrawer mockLine = mock(LineDrawer.class);
-		LaserCalculator lCalc = new LaserCalculator(mockLine, 100, 100);
-		
-		lCalc.fireLaser(5);
-	
-		verify(mockLine).drawLine(50, 100, 0, 95);
-		verify(mockLine).drawLine(0, 95, (float) 100, (float) 86.25114);
+	public void test5Degrees() {
+		mCalc.fireLaser(5, true);
+		verify(mMockLine).drawLine(50, 100, 0, 95, true);
+		verify(mMockLine).drawLine(0, 95, (float) 100, (float) 86.25114, true);
 	}
 	
-	public void test4DegreesIsTreatedLikeFive() throws Exception {
-		LineDrawer mockLine = mock(LineDrawer.class);
-		LaserCalculator lCalc = new LaserCalculator(mockLine, 100, 100);
-		
-		lCalc.fireLaser(4);
-	
-		verify(mockLine).drawLine(50, 100, 0, 95);
-		verify(mockLine).drawLine(0, 95, (float) 100, (float) 86.25114);
+	public void test4DegreesIsTreatedLikeFive() {
+		mCalc.fireLaser(4, true);
+		verify(mMockLine).drawLine(50, 100, 0, 95, true);
+		verify(mMockLine).drawLine(0, 95, (float) 100, (float) 86.25114, true);
 	}
-//	public void test1804DegreesIsTreatedLike179() {
-//		LineDrawer mockLine = mock(LineDrawer.class);
-//		LaserCalculator lCalc = new LaserCalculator(mockLine, 100, 100);
-//		
-//		lCalc.fireLaser(179);
-//	
-//		verify(mockLine).drawLine(50, 100, 0, 95);
-//		verify(mockLine).drawLine(0, 95, (float) 100, (float) 86.25114);
-//	}
-	public void testLastHittingTheLeftWall() throws Exception {
-		LineDrawer mockLine = mock(LineDrawer.class);
-		LaserCalculator lCalc = new LaserCalculator(mockLine, 100, 100);
-		
-		lCalc.fireLaser(63);
-	
-		verify(mockLine).drawLine(50, 100, 0, 1);
+	public void testLastHittingTheLeftWall() {
+		mCalc.fireLaser(63, true);
+		verify(mMockLine).drawLine(50, 100, 0, 1, true);
 	}
-	public void testFirstHittingTheBackWall() throws Exception {
-		LineDrawer mockLine = mock(LineDrawer.class);
-		LaserCalculator lCalc = new LaserCalculator(mockLine, 100, 100);
-		
-		lCalc.fireLaser(64);
 	
-		verify(mockLine).drawLine(50, 100, 1, 0);
+	public void testFirstHittingTheBackWall() {
+		mCalc.fireLaser(64, true);
+		verify(mMockLine).drawLine(50, 100, 1, 0, true);
 	}
-	public void testHittingTheBackWall() throws Exception {
-		LineDrawer mockLine = mock(LineDrawer.class);
-		LaserCalculator lCalc = new LaserCalculator(mockLine, 100, 100);
-		
-		lCalc.fireLaser(90);
 	
-		verify(mockLine).drawLine(50, 100, 50, 0);
+	public void testHittingTheBackWall() {
+		mCalc.fireLaser(90, true);
+		verify(mMockLine).drawLine(50, 100, 50, 0, true);
 	}
-	public void testLastHittingTheBackWall() throws Exception {
-		LineDrawer mockLine = mock(LineDrawer.class);
-		LaserCalculator lCalc = new LaserCalculator(mockLine, 100, 100);
-		
-		lCalc.fireLaser(116);
 	
-		verify(mockLine).drawLine(50, 100, 98, 0);
+	public void testLastHittingTheBackWall() {
+		mCalc.fireLaser(116, true);
+		verify(mMockLine).drawLine(50, 100, 98, 0, true);
 	}
-	public void testFirstHittingTheRightWall() throws Exception {
-		LineDrawer mockLine = mock(LineDrawer.class);
-		LaserCalculator lCalc = new LaserCalculator(mockLine, 100, 100);
-		
-		lCalc.fireLaser(118);
 	
-		verify(mockLine).drawLine(50, 100, 100, 0);
+	public void testFirstHittingTheRightWall() {
+		mCalc.fireLaser(118, true);
+		verify(mMockLine).drawLine(50, 100, 100, 5, true);
+	}
+	public void test175Degrees() {
+		mCalc.fireLaser(175, true);
+		verify(mMockLine).drawLine(50, 100, 100, 95, true);
+		verify(mMockLine).drawLine(100, 95, (float) 0, (float) 86.25114, true);
+	}
+	public void test179DegreesIsTreatedLike175() {
+		mCalc.fireLaser(179, true);
+		verify(mMockLine).drawLine(50, 100, 100, 95, true);
+		verify(mMockLine).drawLine(100, 95, (float) 0, (float) 86.25114, true);
+	}
+	public void testAiming175Degrees() {
+		mCalc.fireLaser(175, false);
+		verify(mMockLine).drawLine(50, 100, 100, 95, false);
+	}
+	public void testAiming179DegreesIsTreatedLike175() {
+		mCalc.fireLaser(179, false);
+		verify(mMockLine).drawLine(50, 100, 100, 95, false);
 	}
 }
