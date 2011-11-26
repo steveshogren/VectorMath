@@ -443,7 +443,12 @@ class LunarView extends SurfaceView implements SurfaceHolder.Callback {
 			if (mFire) {
 				LineDrawer lineDrawer = new RealLineDrawer(canvas, mLinePaint);
 				LaserCalculator calc = new LaserCalculator(lineDrawer, mCanvasWidth, mCanvasHeight);
-				calc.fireLaser(mDesiredDegrees);
+				try {
+					calc.fireLaser(mDesiredDegrees);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				
 				canvas.drawText("Degrees: " + mDesiredDegrees, 50, 50, mLinePaint);
 			}
