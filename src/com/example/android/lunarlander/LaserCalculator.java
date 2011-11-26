@@ -14,6 +14,9 @@ public class LaserCalculator {
 	}
 
 	public void fireLaser(double desiredDegrees) {
+		if (desiredDegrees < 5) {
+			desiredDegrees = 5;
+		}
 		mDesiredDegrees = desiredDegrees;
 
 		int xStart = mCanvasWidth / 2;
