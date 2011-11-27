@@ -38,20 +38,24 @@ public class LaserCalculator {
 		mMaxLeftSideDegrees = getMaxLeftSideDegrees(xStart, yStart);
 		if (hittingLeftWall()) {
 			yEnd = (int) (mCanvasHeight - Math.tan(Math.toRadians(mDesiredDegrees)) * xStart);
+			//TODO: Refactor this into a more usful "detector" that also checks for the closest
 			for (Triangle t : mTriangles) {
-				int[] i1 = Intersection.detect((int) xStart, (int) yStart, (int) xEnd, (int) yEnd, (int) t.point1[0], (int) t.point1[1],(int)  t.point2[0],(int)  t.point2[1]);
-				int[] i2 = Intersection.detect((int) xStart, (int) yStart, (int) xEnd, (int) yEnd, (int) t.point2[0], (int) t.point2[1], (int) t.point3[0], (int) t.point3[1]);
-				int[] i3 = Intersection.detect((int) xStart, (int) yStart, (int) xEnd, (int) yEnd, (int) t.point3[0],(int)  t.point3[1], (int) t.point1[0], (int) t.point1[1]);
+				Point i1 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
+						new Line( new Point((int) t.point1[0], (int) t.point1[1]), new Point((int)  t.point2[0],(int)  t.point2[1])));
+				Point i2 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
+						new Line( new Point((int) t.point2[0], (int) t.point2[1]), new Point((int)  t.point3[0],(int)  t.point3[1])));
+				Point i3 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
+						new Line( new Point((int) t.point3[0], (int) t.point3[1]), new Point((int)  t.point2[0],(int)  t.point2[1])));
 				if (i1 != null) {
 					// something something find the closest
 					// INTERSECTION!
-					mLineDrawer.drawLine(xStart, yStart, i1[0], i1[1], firing);
+					mLineDrawer.drawLine(xStart, yStart, i1.x, i1.y, firing);
 					return;
 				} else if (i2 != null) {
-					mLineDrawer.drawLine(xStart, yStart, i2[0], i2[1], firing);
+					mLineDrawer.drawLine(xStart, yStart, i2.x, i2.y, firing);
 					return;
 				} else if (i3 != null) {
-					mLineDrawer.drawLine(xStart, yStart, i3[0], i3[1], firing);
+					mLineDrawer.drawLine(xStart, yStart, i3.x, i3.y, firing);
 					return;
 				}
 			}
@@ -64,10 +68,50 @@ public class LaserCalculator {
 	    		return;
 			} else if (hittingLeftSideOfBackWall()) {
 				xEnd = (int) (xStart - Math.tan(Math.toRadians(180-90-mDesiredDegrees)) * mCanvasHeight);
+			for (Triangle t : mTriangles) {
+				Point i1 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
+						new Line( new Point((int) t.point1[0], (int) t.point1[1]), new Point((int)  t.point2[0],(int)  t.point2[1])));
+				Point i2 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
+						new Line( new Point((int) t.point2[0], (int) t.point2[1]), new Point((int)  t.point3[0],(int)  t.point3[1])));
+				Point i3 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
+						new Line( new Point((int) t.point3[0], (int) t.point3[1]), new Point((int)  t.point2[0],(int)  t.point2[1])));
+				if (i1 != null) {
+					// something something find the closest
+					// INTERSECTION!
+					mLineDrawer.drawLine(xStart, yStart, i1.x, i1.y, firing);
+					return;
+				} else if (i2 != null) {
+					mLineDrawer.drawLine(xStart, yStart, i2.x, i2.y, firing);
+					return;
+				} else if (i3 != null) {
+					mLineDrawer.drawLine(xStart, yStart, i3.x, i3.y, firing);
+					return;
+				}
+			}
 	    		mLineDrawer.drawLine(xStart, yStart, xEnd, yEnd, firing);
 	    		return;
 			} else { // hitting right side...
 				xEnd = (int) (xStart + Math.tan(Math.toRadians(mDesiredDegrees-90)) * mCanvasHeight);
+			for (Triangle t : mTriangles) {
+				Point i1 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
+						new Line( new Point((int) t.point1[0], (int) t.point1[1]), new Point((int)  t.point2[0],(int)  t.point2[1])));
+				Point i2 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
+						new Line( new Point((int) t.point2[0], (int) t.point2[1]), new Point((int)  t.point3[0],(int)  t.point3[1])));
+				Point i3 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
+						new Line( new Point((int) t.point3[0], (int) t.point3[1]), new Point((int)  t.point2[0],(int)  t.point2[1])));
+				if (i1 != null) {
+					// something something find the closest
+					// INTERSECTION!
+					mLineDrawer.drawLine(xStart, yStart, i1.x, i1.y, firing);
+					return;
+				} else if (i2 != null) {
+					mLineDrawer.drawLine(xStart, yStart, i2.x, i2.y, firing);
+					return;
+				} else if (i3 != null) {
+					mLineDrawer.drawLine(xStart, yStart, i3.x, i3.y, firing);
+					return;
+				}
+			}
 	    		mLineDrawer.drawLine(xStart, yStart, xEnd, yEnd, firing);
 	    		return;
 			}
@@ -75,6 +119,26 @@ public class LaserCalculator {
 			xEnd = mCanvasWidth;
 			mDesiredDegrees = 180 - mDesiredDegrees;
 			yEnd = (int) (mCanvasHeight - Math.tan(Math.toRadians(mDesiredDegrees)) * xStart);
+			for (Triangle t : mTriangles) {
+				Point i1 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
+						new Line( new Point((int) t.point1[0], (int) t.point1[1]), new Point((int)  t.point2[0],(int)  t.point2[1])));
+				Point i2 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
+						new Line( new Point((int) t.point2[0], (int) t.point2[1]), new Point((int)  t.point3[0],(int)  t.point3[1])));
+				Point i3 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
+						new Line( new Point((int) t.point3[0], (int) t.point3[1]), new Point((int)  t.point2[0],(int)  t.point2[1])));
+				if (i1 != null) {
+					// something something find the closest
+					// INTERSECTION!
+					mLineDrawer.drawLine(xStart, yStart, i1.x, i1.y, firing);
+					return;
+				} else if (i2 != null) {
+					mLineDrawer.drawLine(xStart, yStart, i2.x, i2.y, firing);
+					return;
+				} else if (i3 != null) {
+					mLineDrawer.drawLine(xStart, yStart, i3.x, i3.y, firing);
+					return;
+				}
+			}
 			mLineDrawer.drawLine(xStart, yStart, xEnd, yEnd, firing);
 			if (! firing) return; 
 			bounceLeftThenRight(xEnd, yEnd);

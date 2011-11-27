@@ -4,27 +4,62 @@ import junit.framework.TestCase;
 
 public class IntersectionTests extends TestCase {
 	public void test1() {
-		int[] a = Intersection.detect(10, 0, 7, 3, 6, 0, 12, 4);
-		int[] e = {8,1};
-		assertEquals(e[0], a[0]);
-		assertEquals(e[1], a[1]);
+		Point a = Intersection.detect(new Line(new Point(10, 0), new Point(7, 3)), 
+									  new Line(new Point(6, 0), new Point(12, 4)));
+		
+		Point e = new Point(8,1);
+		assertEquals(e, a);
 	}
 	public void test2() {
-		int[] a = Intersection.detect(0, 3, 3, 0, 0, 0, 3, 3);
-		int[] e = {1,1};
-		assertEquals("x coord", e[0], a[0]);
-		assertEquals("y coord", e[1], a[1]);
+		Point a = Intersection.detect(new Line(new Point(0, 3), new Point(3, 0)), 
+									  new Line(new Point(0, 0), new Point(3, 3)));
+		
+		Point e = new Point(1,1);
+		assertEquals(e, a);
 	}
-	public void test3() {
-		int[] a = Intersection.detect(0, 3, 3, 0, 2, 0, 2, 2);
-		int[] e = {2,1};
-		assertEquals("x coord", e[0], a[0]);
-		assertEquals("y coord", e[1], a[1]);
+	public void testFirstLineVertical() {
+		Point a = Intersection.detect(new Line(new Point(0, 3), new Point(3, 0)), 
+									  new Line(new Point(2, 0), new Point(2, 2)));
+		
+		Point e = new Point(2,1);
+		assertEquals(e, a);
+	}
+	public void testSecondLineVertical() {
+		Point a = Intersection.detect(new Line(new Point(2, 0), new Point(2, 2)), 
+									new Line(new Point(0, 3), new Point(3, 0)));
+		
+		Point e = new Point(2,1);
+		assertEquals(e, a);
+	}
+	public void testSecondLineHorizontal() {
+		Point a = Intersection.detect(new Line(new Point(0, 3), new Point(3, 0)), 
+									  new Line(new Point(0, 2), new Point(2, 2)));
+		
+		Point e = new Point(1,2);
+		assertEquals(e, a);
+	}
+	public void testFirstLineHorizontal() {
+		Point a = Intersection.detect( new Line(new Point(0, 2), new Point(2, 2)), 
+								    	new Line(new Point(0, 3), new Point(3, 0)));
+		
+		Point e = new Point(1,2);
+		assertEquals(e, a);
 	}
 	public void testNoIntersect() {
-		assertNull(Intersection.detect(0, 3, 3, 0, 2, 0, 0, 2));
+		assertNull(Intersection.detect(new Line(new Point(0, 3), new Point(3, 0)), 
+									  new Line(new Point(2, 0), new Point(0, 2))));
 	}
 	public void testNoIntersect1() {
-		assertNull(Intersection.detect(0, 3, 3, 0, 4, 0, 0, 5));
+		assertNull(Intersection.detect(new Line(new Point(0, 3), new Point(3, 0)), 
+									  new Line(new Point(4, 0), new Point(0, 5))));
+	}
+	public void testNoIntersect2() {
+		assertNull(Intersection.detect(new Line(new Point(0, 3), new Point(3, 0)), 
+									  new Line(new Point(1, 4), new Point(3, 4))));
+	}
+	public void testNoIntersect3() {
+		Point point = Intersection.detect(new Line(new Point(1, 1), new Point(3, 1)), 
+									  new Line(new Point(4, 2), new Point(4, 4)));
+		assertNull("point: " + point, point);
 	}
 }
