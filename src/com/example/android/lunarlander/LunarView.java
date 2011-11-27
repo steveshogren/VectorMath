@@ -138,7 +138,6 @@ class LunarView extends SurfaceView implements SurfaceHolder.Callback {
 			mLinePaintBad = new Paint();
 			mLinePaintBad.setAntiAlias(true);
 			mLinePaintBad.setARGB(255, 120, 180, 0);
-
 			mScratchRect = new RectF(0, 0, 0, 0);
 		}
 
@@ -433,35 +432,38 @@ class LunarView extends SurfaceView implements SurfaceHolder.Callback {
 			canvas.drawRect(mScratchRect, mFiringLinePaint);
 
 			Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-
 			paint.setStrokeWidth(2);
-			paint.setColor(android.graphics.Color.RED);
+			paint.setColor(android.graphics.Color.BLUE);
 			paint.setStyle(Paint.Style.FILL_AND_STROKE);
 			paint.setAntiAlias(true);
-
-			Path path = new Path();
-			path.setFillType(Path.FillType.EVEN_ODD);
-			path.moveTo(20, 20);
-			path.lineTo(10, 30);
-			path.lineTo(20, 60);
-			path.lineTo(20, 20);
-			path.close();
-
-			canvas.drawPath(path, paint);
-				LineDrawer lineDrawer = new RealLineDrawer(canvas, mFiringLinePaint, mTargetingLinePaint);
-				LaserCalculator calc = new LaserCalculator(lineDrawer, mCanvasWidth, mCanvasHeight);
-				try {
-					calc.fireLaser(mDesiredDegrees, mFire);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-				canvas.drawText("Degrees: " + mDesiredDegrees, 50, 50, mFiringLinePaint);
+            
+			// TODO: generate random map stuff here
+			Triangle[] obsticles = {new Triangle(0, 80, 40, 30, 0, 0), 
+					new Triangle(mCanvasWidth, 40, mCanvasWidth - 40, 50, mCanvasWidth, 60)};
+			for (Triangle triangle : obsticles) {
+				drawTriangle(canvas, paint, triangle);
+			}
+			LineDrawer lineDrawer = new RealLineDrawer(canvas, mFiringLinePaint, mTargetingLinePaint);
+			LaserCalculator calc = new LaserCalculator(lineDrawer, mCanvasWidth, mCanvasHeight, obsticles);
+			calc.fireLaser(mDesiredDegrees, mFire);
+			
+			canvas.drawText("Degrees: " + mDesiredDegrees, 50, 50, mFiringLinePaint);
 			canvas.restore();
 		}
-	}
 
+		private void drawTriangle(Canvas canvas, Paint paint, Triangle t) {
+			Path path = new Path();
+			path.setFillType(Path.FillType.EVEN_ODD);
+			path.moveTo(t.point1[0], t.point1[1]);
+			path.lineTo(t.point2[0], t.point2[1]);
+			path.lineTo(t.point3[0], t.point3[1]);
+			path.lineTo(t.point1[0], t.point1[1]);
+			path.close();
+			
+			canvas.drawPath(path, paint);
+		}
+	}
+	
 	/** Handle to the application context, used to e.g. fetch Drawables. */
 	private Context mContext;
 

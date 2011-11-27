@@ -7,9 +7,17 @@ public class LaserCalculator {
 	private double mDesiredDegrees;
 	private LineDrawer mLineDrawer;
 	private double mMaxLeftSideDegrees;
+	private Triangle[] mTriangles;
 
 	public LaserCalculator(LineDrawer lineDrawer, int canvasWidth, int canvasHeight) {
 		mLineDrawer = lineDrawer;
+		mCanvasWidth = canvasWidth;
+		mCanvasHeight = canvasHeight;
+		mTriangles = new Triangle[] {};
+	}
+	public LaserCalculator(LineDrawer lineDrawer, int canvasWidth, int canvasHeight, Triangle[] triangles) {
+		mLineDrawer = lineDrawer;
+		mTriangles = triangles;
 		mCanvasWidth = canvasWidth;
 		mCanvasHeight = canvasHeight;
 	}
@@ -30,6 +38,23 @@ public class LaserCalculator {
 		mMaxLeftSideDegrees = getMaxLeftSideDegrees(xStart, yStart);
 		if (hittingLeftWall()) {
 			yEnd = (int) (mCanvasHeight - Math.tan(Math.toRadians(mDesiredDegrees)) * xStart);
+			for (Triangle t : mTriangles) {
+				int[] i1 = Intersection.detect((int) xStart, (int) yStart, (int) xEnd, (int) yEnd, (int) t.point1[0], (int) t.point1[1],(int)  t.point2[0],(int)  t.point2[1]);
+				int[] i2 = Intersection.detect((int) xStart, (int) yStart, (int) xEnd, (int) yEnd, (int) t.point2[0], (int) t.point2[1], (int) t.point3[0], (int) t.point3[1]);
+				int[] i3 = Intersection.detect((int) xStart, (int) yStart, (int) xEnd, (int) yEnd, (int) t.point3[0],(int)  t.point3[1], (int) t.point1[0], (int) t.point1[1]);
+				if (i1 != null) {
+					// something something find the closest
+					// INTERSECTION!
+					mLineDrawer.drawLine(xStart, yStart, i1[0], i1[1], firing);
+					return;
+				} else if (i2 != null) {
+					mLineDrawer.drawLine(xStart, yStart, i2[0], i2[1], firing);
+					return;
+				} else if (i3 != null) {
+					mLineDrawer.drawLine(xStart, yStart, i3[0], i3[1], firing);
+					return;
+				}
+			}
 			mLineDrawer.drawLine(xStart, yStart, xEnd, yEnd, firing);
 			if (! firing) return; 
 			bounceRightThenLeft(xStart, yStart, xEnd, yEnd);
