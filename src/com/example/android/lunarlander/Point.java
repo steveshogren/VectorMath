@@ -18,4 +18,10 @@ public class Point {
 		}
 		return false;
 	}
+	public double distanceTo(Line line) {
+		Point A = line.p1;
+		Point B = line.p2;
+		double normalLength = Math.sqrt((B.x-A.x)*(B.x-A.x)+(B.y-A.y)*(B.y-A.y));
+		return Math.abs((x-A.x)*(B.y-A.y)-(y-A.y)*(B.x-A.x))/normalLength;
+	}
 }

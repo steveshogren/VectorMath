@@ -1,4 +1,7 @@
-package com.example.android.lunarlander;
+package com.example.android.lunarlander.tests;
+
+import com.example.android.lunarlander.LaserCalculator;
+import com.example.android.lunarlander.LineDrawer;
 
 import junit.framework.TestCase;
 import static org.mockito.Mockito.*;

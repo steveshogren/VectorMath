@@ -1,4 +1,8 @@
-package com.example.android.lunarlander;
+package com.example.android.lunarlander.tests;
+
+import com.example.android.lunarlander.Intersection;
+import com.example.android.lunarlander.Line;
+import com.example.android.lunarlander.Point;
 
 import junit.framework.TestCase;
 
