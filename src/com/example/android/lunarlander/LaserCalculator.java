@@ -76,13 +76,18 @@ public class LaserCalculator {
 	}
 	
 	private boolean tryToReflect(Line beam, boolean firing) {
-		for (Triangle t : mTriangles) {
-			Point i1 = Intersection.detect(beam, new Line(new Point((int) t.point1[0],
-					(int) t.point1[1]), new Point((int) t.point2[0], (int) t.point2[1])));
-			Point i2 = Intersection.detect(beam, new Line(new Point((int) t.point2[0],
-					(int) t.point2[1]), new Point((int) t.point3[0], (int) t.point3[1])));
-			Point i3 = Intersection.detect(beam, new Line(new Point((int) t.point3[0],
-					(int) t.point3[1]), new Point((int) t.point2[0], (int) t.point2[1])));
+		for (Triangle triangle : mTriangles) {
+			Float[][] t = triangle.pointCoordinates();
+			Float[] point1 = t[0];
+			Float[] point2 = t[1];
+			Float[] point3 = t[2];
+			
+			Point i1 = Intersection.detect(beam, new Line(new Point(point1[0].intValue(),
+					 point1[1].intValue()), new Point(point2[0].intValue(), point2[1].intValue())));
+			Point i2 = Intersection.detect(beam, new Line(new Point(point2[0].intValue(),
+					 point2[1].intValue()), new Point(point3[0].intValue(), point3[1].intValue())));
+			Point i3 = Intersection.detect(beam, new Line(new Point( point3[0].intValue(),
+					 point3[1].intValue()), new Point(point2[0].intValue(), point2[1].intValue())));
 
 			List<Point> p = new ArrayList<Point>();
 			if (i1 != null) {

@@ -438,10 +438,10 @@ class LunarView extends SurfaceView implements SurfaceHolder.Callback {
 			paint.setAntiAlias(true);
             
 			// TODO: generate random map stuff here
-			Triangle[] obsticles = {new Triangle(0, 80, 40, 30, 0, 0), 
-					new Triangle(mCanvasWidth, 40, mCanvasWidth - 40, 50, mCanvasWidth, 60)};
+			Triangle[] obsticles = {new Triangle(new Point(0, 80), new Point(40, 30), new Point(0, 0)), 
+					new Triangle(new Point(mCanvasWidth, 40), new Point(mCanvasWidth - 40, 50), new Point(mCanvasWidth, 60))};
 			for (Triangle triangle : obsticles) {
-				drawTriangle(canvas, paint, triangle);
+				drawTriangle(canvas, paint, triangle.pointCoordinates());
 			}
 			LineDrawer lineDrawer = new RealLineDrawer(canvas, mFiringLinePaint, mTargetingLinePaint);
 			LaserCalculator calc = new LaserCalculator(lineDrawer, mCanvasWidth, mCanvasHeight, obsticles);
@@ -451,13 +451,17 @@ class LunarView extends SurfaceView implements SurfaceHolder.Callback {
 			canvas.restore();
 		}
 
-		private void drawTriangle(Canvas canvas, Paint paint, Triangle t) {
+		private void drawTriangle(Canvas canvas, Paint paint, Float[][] trianglePoints) {
+			Float[] point1 = trianglePoints[0];
+			Float[] point2 = trianglePoints[1];
+			Float[] point3 = trianglePoints[2];
+			
 			Path path = new Path();
 			path.setFillType(Path.FillType.EVEN_ODD);
-			path.moveTo(t.point1[0], t.point1[1]);
-			path.lineTo(t.point2[0], t.point2[1]);
-			path.lineTo(t.point3[0], t.point3[1]);
-			path.lineTo(t.point1[0], t.point1[1]);
+			path.moveTo(point1[0], point1[1]);
+			path.lineTo(point2[0], point2[1]);
+			path.lineTo(point3[0], point3[1]);
+			path.lineTo(point1[0], point1[1]);
 			path.close();
 			
 			canvas.drawPath(path, paint);
