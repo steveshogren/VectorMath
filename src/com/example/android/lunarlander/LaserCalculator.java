@@ -1,5 +1,9 @@
 package com.example.android.lunarlander;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class LaserCalculator {
 
 	private int mCanvasWidth;
@@ -30,139 +34,90 @@ public class LaserCalculator {
 		if (mDesiredDegrees > 175) {
 			mDesiredDegrees = 175;
 		}
-		float xStart = mCanvasWidth / 2;
-		float yStart = mCanvasHeight;
-		float xEnd = 0;
-		float yEnd = 0;
+		Line beam = new Line(new Point(mCanvasWidth/2, mCanvasHeight), new Point(0,0));
 
-		mMaxLeftSideDegrees = getMaxLeftSideDegrees(xStart, yStart);
+		mMaxLeftSideDegrees = getMaxLeftSideDegrees(beam.p1);
 		if (hittingLeftWall()) {
-			yEnd = (int) (mCanvasHeight - Math.tan(Math.toRadians(mDesiredDegrees)) * xStart);
-			//TODO: Refactor this into a more usful "detector" that also checks for the closest
-			for (Triangle t : mTriangles) {
-				Point i1 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
-						new Line( new Point((int) t.point1[0], (int) t.point1[1]), new Point((int)  t.point2[0],(int)  t.point2[1])));
-				Point i2 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
-						new Line( new Point((int) t.point2[0], (int) t.point2[1]), new Point((int)  t.point3[0],(int)  t.point3[1])));
-				Point i3 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
-						new Line( new Point((int) t.point3[0], (int) t.point3[1]), new Point((int)  t.point2[0],(int)  t.point2[1])));
-				if (i1 != null) {
-					// something something find the closest
-					// INTERSECTION!
-					mLineDrawer.drawLine(xStart, yStart, i1.x, i1.y, firing);
-					return;
-				} else if (i2 != null) {
-					mLineDrawer.drawLine(xStart, yStart, i2.x, i2.y, firing);
-					return;
-				} else if (i3 != null) {
-					mLineDrawer.drawLine(xStart, yStart, i3.x, i3.y, firing);
-					return;
-				}
+			beam.p2.y = (int) (mCanvasHeight - Math.tan(Math.toRadians(mDesiredDegrees)) * beam.p1.x);
+			if (! tryToReflect(beam, firing)) {
+				mLineDrawer.drawLine(beam, firing);
+				if (! firing) return; 
+				bounceRightThenLeft(beam);
 			}
-			mLineDrawer.drawLine(xStart, yStart, xEnd, yEnd, firing);
-			if (! firing) return; 
-			bounceRightThenLeft(xStart, yStart, xEnd, yEnd);
 		} else if (hittingBackWall()) {
 			if (firingStraightUp()) {
-				mLineDrawer.drawLine(xStart, yStart, xStart, 0, firing);
+				beam.p2.y = 0;
+				beam.p2.x = beam.p1.x;
+				mLineDrawer.drawLine(beam, firing);
 	    		return;
 			} else if (hittingLeftSideOfBackWall()) {
-				xEnd = (int) (xStart - Math.tan(Math.toRadians(180-90-mDesiredDegrees)) * mCanvasHeight);
-			for (Triangle t : mTriangles) {
-				Point i1 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
-						new Line( new Point((int) t.point1[0], (int) t.point1[1]), new Point((int)  t.point2[0],(int)  t.point2[1])));
-				Point i2 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
-						new Line( new Point((int) t.point2[0], (int) t.point2[1]), new Point((int)  t.point3[0],(int)  t.point3[1])));
-				Point i3 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
-						new Line( new Point((int) t.point3[0], (int) t.point3[1]), new Point((int)  t.point2[0],(int)  t.point2[1])));
-				if (i1 != null) {
-					// something something find the closest
-					// INTERSECTION!
-					mLineDrawer.drawLine(xStart, yStart, i1.x, i1.y, firing);
-					return;
-				} else if (i2 != null) {
-					mLineDrawer.drawLine(xStart, yStart, i2.x, i2.y, firing);
-					return;
-				} else if (i3 != null) {
-					mLineDrawer.drawLine(xStart, yStart, i3.x, i3.y, firing);
+				beam.p2.x = (int) (beam.p1.x - Math.tan(Math.toRadians(180-90-mDesiredDegrees)) * mCanvasHeight);
+				if (! tryToReflect(beam, firing)) {
+					mLineDrawer.drawLine(beam, firing);
 					return;
 				}
-			}
-	    		mLineDrawer.drawLine(xStart, yStart, xEnd, yEnd, firing);
-	    		return;
 			} else { // hitting right side...
-				xEnd = (int) (xStart + Math.tan(Math.toRadians(mDesiredDegrees-90)) * mCanvasHeight);
-			for (Triangle t : mTriangles) {
-				Point i1 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
-						new Line( new Point((int) t.point1[0], (int) t.point1[1]), new Point((int)  t.point2[0],(int)  t.point2[1])));
-				Point i2 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
-						new Line( new Point((int) t.point2[0], (int) t.point2[1]), new Point((int)  t.point3[0],(int)  t.point3[1])));
-				Point i3 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
-						new Line( new Point((int) t.point3[0], (int) t.point3[1]), new Point((int)  t.point2[0],(int)  t.point2[1])));
-				if (i1 != null) {
-					// something something find the closest
-					// INTERSECTION!
-					mLineDrawer.drawLine(xStart, yStart, i1.x, i1.y, firing);
-					return;
-				} else if (i2 != null) {
-					mLineDrawer.drawLine(xStart, yStart, i2.x, i2.y, firing);
-					return;
-				} else if (i3 != null) {
-					mLineDrawer.drawLine(xStart, yStart, i3.x, i3.y, firing);
+				beam.p2.x = (int) (beam.p1.x + Math.tan(Math.toRadians(mDesiredDegrees-90)) * mCanvasHeight);
+				if (! tryToReflect(beam, firing)) {
+					mLineDrawer.drawLine(beam, firing);
 					return;
 				}
-			}
-	    		mLineDrawer.drawLine(xStart, yStart, xEnd, yEnd, firing);
-	    		return;
 			}
 		} else { // hitting right wall
-			xEnd = mCanvasWidth;
+			beam.p2.x = mCanvasWidth;
 			mDesiredDegrees = 180 - mDesiredDegrees;
-			yEnd = (int) (mCanvasHeight - Math.tan(Math.toRadians(mDesiredDegrees)) * xStart);
-			for (Triangle t : mTriangles) {
-				Point i1 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
-						new Line( new Point((int) t.point1[0], (int) t.point1[1]), new Point((int)  t.point2[0],(int)  t.point2[1])));
-				Point i2 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
-						new Line( new Point((int) t.point2[0], (int) t.point2[1]), new Point((int)  t.point3[0],(int)  t.point3[1])));
-				Point i3 = Intersection.detect(new Line( new Point((int) xStart, (int) yStart), new Point((int) xEnd, (int) yEnd)), 
-						new Line( new Point((int) t.point3[0], (int) t.point3[1]), new Point((int)  t.point2[0],(int)  t.point2[1])));
-				if (i1 != null) {
-					// something something find the closest
-					// INTERSECTION!
-					mLineDrawer.drawLine(xStart, yStart, i1.x, i1.y, firing);
-					return;
-				} else if (i2 != null) {
-					mLineDrawer.drawLine(xStart, yStart, i2.x, i2.y, firing);
-					return;
-				} else if (i3 != null) {
-					mLineDrawer.drawLine(xStart, yStart, i3.x, i3.y, firing);
-					return;
-				}
+			beam.p2.y = (int) (mCanvasHeight - Math.tan(Math.toRadians(mDesiredDegrees)) * beam.p1.x);
+			if (! tryToReflect(beam, firing)) {
+				mLineDrawer.drawLine(beam, firing);
+				if (! firing) return; 
+				bounceLeftThenRight(beam);
 			}
-			mLineDrawer.drawLine(xStart, yStart, xEnd, yEnd, firing);
-			if (! firing) return; 
-			bounceLeftThenRight(xEnd, yEnd);
 		}
 	}
 	
-	private void bounceLeftThenRight(float xEnd, float yEnd) {
-		float xStart;
-		float yStart;
+	private boolean tryToReflect(Line beam, boolean firing) {
+		for (Triangle t : mTriangles) {
+			Point i1 = Intersection.detect(beam, new Line(new Point((int) t.point1[0],
+					(int) t.point1[1]), new Point((int) t.point2[0], (int) t.point2[1])));
+			Point i2 = Intersection.detect(beam, new Line(new Point((int) t.point2[0],
+					(int) t.point2[1]), new Point((int) t.point3[0], (int) t.point3[1])));
+			Point i3 = Intersection.detect(beam, new Line(new Point((int) t.point3[0],
+					(int) t.point3[1]), new Point((int) t.point2[0], (int) t.point2[1])));
+
+			List<Point> p = new ArrayList<Point>();
+			if (i1 != null) {
+				p.add(i1);
+			} else if (i2 != null) {
+				p.add(i2);
+			} else if (i3 != null) {
+				p.add(i3);
+			}
+			if (!p.isEmpty()) {
+				Collections.sort(p, new PointComparator(beam.p1));
+				beam.p2.x = p.get(0).x;
+				beam.p2.y = p.get(0).y;
+				mLineDrawer.drawLine(beam, firing);
+				return true;
+			}
+		}
+		return false;
+	}
+	private void bounceLeftThenRight(Line beam) {
 		double nextAngle = 180 - (mDesiredDegrees + 90);
 		// -----Heading left ----
-		xStart = xEnd;
-		yStart = yEnd;
-		xEnd = 0; // left wall
-		yEnd = 0; // back wall
+		beam.p1.x = beam.p2.x;
+		beam.p1.y = beam.p2.y;
+		beam.p2.x = 0; // left wall
+		beam.p2.y = 0; // back wall
 
-		yEnd = yStart - (float) (Math.tan(Math.toRadians(mDesiredDegrees)) * xStart);
-		if (yEnd > 0) { // left wall
-			mLineDrawer.drawLine(xStart, yStart, xEnd, yEnd, true);
-			bounceRightThenLeft(xStart, yStart, xEnd, yEnd);
+		beam.p2.y = (int)( beam.p1.y - (float) (Math.tan(Math.toRadians(mDesiredDegrees)) * beam.p1.x));
+		if (beam.p2.y > 0) { // left wall
+			mLineDrawer.drawLine(beam, true);
+			bounceRightThenLeft(beam);
 		} else { // back wall
-			yEnd = 0;
-			xEnd = (float) (mCanvasWidth - Math.tan(Math.toRadians(nextAngle)) * yStart);
-			mLineDrawer.drawLine(xStart, yStart, xEnd, yEnd, true);
+			beam.p2.y = 0;
+			beam.p2.x = (int) (mCanvasWidth - Math.tan(Math.toRadians(nextAngle)) * beam.p1.y);
+			mLineDrawer.drawLine(beam, true);
 		}
 	}
 	private boolean hittingLeftSideOfBackWall() {
@@ -185,8 +140,8 @@ public class LaserCalculator {
 	 * Returns the maximum number of degrees this map supports while still 
 	 * hitting the left wall
 	 */
-	private double getMaxLeftSideDegrees(float xStart, float yStart) {
-		double T = Math.atan2(xStart, yStart) * 180.0F / Math.PI;
+	private double getMaxLeftSideDegrees(Point startPoint) {
+		double T = Math.atan2(startPoint.x, startPoint.y) * 180.0F / Math.PI;
 		double M = 180 - (T + 90);
 		return M;
 	}
@@ -199,35 +154,35 @@ public class LaserCalculator {
 		return mDesiredDegrees < mMaxLeftSideDegrees;
 	}
 
-	private void bounceRightThenLeft(float xStart, float yStart, float xEnd, float yEnd) {
+	private void bounceRightThenLeft(Line beam) {
 		// -----Heading right ---
-		xStart = xEnd;
-		yStart = yEnd;
-		yEnd = 0;
+		beam.p1.x = beam.p2.x;
+		beam.p1.y = beam.p2.y;
+		beam.p2.y = 0;
 
 		double nextAngle = 180 - (mDesiredDegrees + 90);
-		xEnd = (float) (Math.tan(Math.toRadians(nextAngle)) * yStart);
-		if (xEnd < mCanvasWidth) { // hitting back wall
-			mLineDrawer.drawLine(xStart, yStart, xEnd, yEnd, true);
+		beam.p2.x = (int) (Math.tan(Math.toRadians(nextAngle)) * beam.p1.y);
+		if (beam.p2.x < mCanvasWidth) { // hitting back wall
+			mLineDrawer.drawLine(beam, true);
 		} else { // bounce off right wall
-			xEnd = mCanvasWidth;
-			yEnd = yStart - (float) (Math.tan(Math.toRadians(mDesiredDegrees)) * mCanvasWidth);
-			mLineDrawer.drawLine(xStart, yStart, xEnd, yEnd, true);
+			beam.p2.x = mCanvasWidth;
+			beam.p2.y = (int)(beam.p1.y - (float) (Math.tan(Math.toRadians(mDesiredDegrees)) * mCanvasWidth));
+			mLineDrawer.drawLine(beam, true);
 
 			// -----Heading left ----
-			xStart = xEnd;
-			yStart = yEnd;
-			xEnd = 0; // left wall
-			yEnd = 0; // back wall
+			beam.p1.x = beam.p2.x;
+			beam.p1.y = beam.p2.y;
+			beam.p2.x = 0; // left wall
+			beam.p2.y = 0; // back wall
 
-			yEnd = yStart - (float) (Math.tan(Math.toRadians(mDesiredDegrees)) * xStart);
-			if (yEnd > 0) { // left wall
-				mLineDrawer.drawLine(xStart, yStart, xEnd, yEnd, true);
-				bounceRightThenLeft(xStart, yStart, xEnd, yEnd);
+			beam.p2.y = (int) (beam.p1.y - (float) (Math.tan(Math.toRadians(mDesiredDegrees)) * beam.p1.x));
+			if (beam.p2.y > 0) { // left wall
+				mLineDrawer.drawLine(beam, true);
+				bounceRightThenLeft(beam);
 			} else { // back wall
-				yEnd = 0;
-				xEnd = (float) (mCanvasWidth - Math.tan(Math.toRadians(nextAngle)) * yStart);
-				mLineDrawer.drawLine(xStart, yStart, xEnd, yEnd, true);
+				beam.p2.y = 0;
+				beam.p2.x = (int) (mCanvasWidth - Math.tan(Math.toRadians(nextAngle)) * beam.p1.y);
+				mLineDrawer.drawLine(beam, true);
 			}
 		}
 	}

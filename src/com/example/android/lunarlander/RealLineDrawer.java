@@ -15,11 +15,11 @@ public class RealLineDrawer implements LineDrawer {
 		mAimingPaint = aimingPaint; 
 	}
 	
-	public void drawLine(float xStart, float yStart, float xEnd, float yEnd, boolean firing) {
+	public void drawLine(Line beam, boolean firing) {
 		if (firing) {
-			mCanvas.drawLine(xStart, yStart, xEnd, yEnd, mPaint);
+			mCanvas.drawLine(beam.p1.x, beam.p1.y, beam.p2.x, beam.p2.y, mPaint);
 		} else {
-			mCanvas.drawLine(xStart, yStart, xEnd, yEnd, mAimingPaint);
+			mCanvas.drawLine(beam.p1.x, beam.p1.y, beam.p2.x, beam.p2.y, mAimingPaint);
 		}
 	}
 }

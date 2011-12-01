@@ -24,4 +24,11 @@ public class Point {
 		double normalLength = Math.sqrt((B.x-A.x)*(B.x-A.x)+(B.y-A.y)*(B.y-A.y));
 		return Math.abs((x-A.x)*(B.y-A.y)-(y-A.y)*(B.x-A.x))/normalLength;
 	}
+	public double distanceTo(Point p) {
+		double dx   = p.x - x;      
+		double dy   = p.y - y;    
+		double dist = Math.sqrt( dx*dx + dy*dy ); 
+		return dist;	
+	}
+	
 }
