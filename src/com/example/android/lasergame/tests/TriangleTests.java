@@ -1,10 +1,9 @@
 package com.example.android.lasergame.tests;
 
-import junit.framework.TestCase;
 
 import com.example.android.lasergame.*;
 
-public class TriangleTests extends TestCase {
+public class TriangleTests extends GeometryTestCase {
 
     private Triangle triangle;
 
@@ -18,9 +17,5 @@ public class TriangleTests extends TestCase {
 
     public void testShouldIntersectWithALineThatPassesThroughIt() {
         assertTrue(triangle.intersectsWith(makeLine(1, 1, 0, 0)));
-    }
-
-    private static Line makeLine(int x1, int y1, int x2, int y2) {
-        return new Line(new Point(x1, y1), new Point(x2, y2));
     }
 }
