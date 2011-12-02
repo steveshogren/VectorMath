@@ -1,6 +1,4 @@
 package com.example.android.lasergame.tests;
-
-
 import com.example.android.lasergame.*;
 
 public class TriangleTests extends GeometryTestCase {
