@@ -26,7 +26,7 @@ public class LaserCalculatorTests extends TestCase {
 
 	public void test45DegreesWithTriangle() {
 		mMockLine = mock(LineDrawer.class);
-		Triangle[] t = {new Triangle(0, 0, 50, 0, 50, 0)};
+		Triangle[] t = {new Triangle(new Point(0, 0), new Point(50, 0), new Point(50, 0))};
 		mCalc = new LaserCalculator(mMockLine, 100, 100, t);
 
 		mCalc.fireLaser(65, true);
