@@ -16,7 +16,7 @@
 
 package com.example.android.lasergame;
 
-import com.example.android.lunarlander.R;
+import com.example.android.lasergame.R;
 
 import android.content.Context;
 import android.content.res.Resources;

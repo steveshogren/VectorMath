@@ -8,7 +8,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.example.android.lasergame.LaserView.LaserThread;
-import com.example.android.lunarlander.R;
+import com.example.android.lasergame.R;
 
 /**
  * This is a simple LunarLander activity that houses a single LunarView. It
@@ -26,10 +26,10 @@ public class LaserGame extends Activity {
     private static final int MENU_STOP = 7;
 
     /** A handle to the thread that's actually running the animation. */
-    private LaserThread mLunarThread;
+    private LaserThread mLaserThread;
 
     /** A handle to the View in which the game is running. */
-    private LaserView mLunarView;
+    private LaserView mLaserView;
 
     /**
      * Invoked during init to give the Activity a chance to set up its Menu.
@@ -62,16 +62,16 @@ public class LaserGame extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case MENU_START:
-            mLunarThread.doStart();
+            mLaserThread.doStart();
             return true;
         case MENU_STOP:
-            mLunarThread.setState(LaserThread.STATE_LOSE, getText(R.string.message_stopped));
+            mLaserThread.setState(LaserThread.STATE_LOSE, getText(R.string.message_stopped));
             return true;
         case MENU_PAUSE:
-            mLunarThread.pause();
+            mLaserThread.pause();
             return true;
         case MENU_RESUME:
-            mLunarThread.unpause();
+            mLaserThread.unpause();
             return true;
         }
 
@@ -93,19 +93,19 @@ public class LaserGame extends Activity {
         setContentView(R.layout.lunar_layout);
 
         // get handles to the LunarView from XML, and its LunarThread
-        mLunarView = (LaserView) findViewById(R.id.lunar);
-        mLunarThread = mLunarView.getThread();
+        mLaserView = (LaserView) findViewById(R.id.lunar);
+        mLaserThread = mLaserView.getThread();
 
         // give the LunarView a handle to the TextView used for messages
-        mLunarView.setTextView((TextView) findViewById(R.id.text));
+        mLaserView.setTextView((TextView) findViewById(R.id.text));
 
         if (savedInstanceState == null) {
             // we were just launched: set up a new game
-            mLunarThread.setState(LaserThread.STATE_READY);
+            mLaserThread.setState(LaserThread.STATE_READY);
             Log.w(this.getClass().getName(), "SIS is null");
         } else {
             // we are being restored: resume a previous game
-            mLunarThread.restoreState(savedInstanceState);
+            mLaserThread.restoreState(savedInstanceState);
             Log.w(this.getClass().getName(), "SIS is nonnull");
         }
     }
@@ -116,7 +116,7 @@ public class LaserGame extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        mLunarView.getThread().pause(); // pause game when Activity pauses
+        mLaserView.getThread().pause(); // pause game when Activity pauses
     }
 
     /**
@@ -130,7 +130,7 @@ public class LaserGame extends Activity {
     protected void onSaveInstanceState(Bundle outState) {
         // just have the View's thread save its state into our Bundle
         super.onSaveInstanceState(outState);
-        mLunarThread.saveState(outState);
+        mLaserThread.saveState(outState);
         Log.w(this.getClass().getName(), "SIS called");
     }
 }
