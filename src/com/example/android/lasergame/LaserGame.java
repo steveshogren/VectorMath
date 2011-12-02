@@ -1,4 +1,4 @@
-package com.example.android.lunarlander;
+package com.example.android.lasergame;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -7,7 +7,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import com.example.android.lunarlander.LunarView.LunarThread;
+import com.example.android.lasergame.LaserView.LaserThread;
+import com.example.android.lunarlander.R;
 
 /**
  * This is a simple LunarLander activity that houses a single LunarView. It
@@ -18,22 +19,23 @@ import com.example.android.lunarlander.LunarView.LunarThread;
  * <li>handling onPause() in an animation
  * </ul>
  */
-public class LunarLander extends Activity {
+public class LaserGame extends Activity {
     private static final int MENU_PAUSE = 4;
     private static final int MENU_RESUME = 5;
     private static final int MENU_START = 6;
     private static final int MENU_STOP = 7;
 
     /** A handle to the thread that's actually running the animation. */
-    private LunarThread mLunarThread;
+    private LaserThread mLunarThread;
 
     /** A handle to the View in which the game is running. */
-    private LunarView mLunarView;
+    private LaserView mLunarView;
 
     /**
      * Invoked during init to give the Activity a chance to set up its Menu.
      * 
-     * @param menu the Menu to which entries may be added
+     * @param menu
+     *            the Menu to which entries may be added
      * @return true
      */
     @Override
@@ -51,26 +53,26 @@ public class LunarLander extends Activity {
     /**
      * Invoked when the user selects an item from the Menu.
      * 
-     * @param item the Menu entry which was selected
+     * @param item
+     *            the Menu entry which was selected
      * @return true if the Menu item was legit (and we consumed it), false
      *         otherwise
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case MENU_START:
-                mLunarThread.doStart();
-                return true;
-            case MENU_STOP:
-                mLunarThread.setState(LunarThread.STATE_LOSE,
-                        getText(R.string.message_stopped));
-                return true;
-            case MENU_PAUSE:
-                mLunarThread.pause();
-                return true;
-            case MENU_RESUME:
-                mLunarThread.unpause();
-                return true;
+        case MENU_START:
+            mLunarThread.doStart();
+            return true;
+        case MENU_STOP:
+            mLunarThread.setState(LaserThread.STATE_LOSE, getText(R.string.message_stopped));
+            return true;
+        case MENU_PAUSE:
+            mLunarThread.pause();
+            return true;
+        case MENU_RESUME:
+            mLunarThread.unpause();
+            return true;
         }
 
         return false;
@@ -79,8 +81,9 @@ public class LunarLander extends Activity {
     /**
      * Invoked when the Activity is created.
      * 
-     * @param savedInstanceState a Bundle containing state saved from a previous
-     *        execution, or null if this is a new execution
+     * @param savedInstanceState
+     *            a Bundle containing state saved from a previous execution, or
+     *            null if this is a new execution
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,7 +93,7 @@ public class LunarLander extends Activity {
         setContentView(R.layout.lunar_layout);
 
         // get handles to the LunarView from XML, and its LunarThread
-        mLunarView = (LunarView) findViewById(R.id.lunar);
+        mLunarView = (LaserView) findViewById(R.id.lunar);
         mLunarThread = mLunarView.getThread();
 
         // give the LunarView a handle to the TextView used for messages
@@ -98,7 +101,7 @@ public class LunarLander extends Activity {
 
         if (savedInstanceState == null) {
             // we were just launched: set up a new game
-            mLunarThread.setState(LunarThread.STATE_READY);
+            mLunarThread.setState(LaserThread.STATE_READY);
             Log.w(this.getClass().getName(), "SIS is null");
         } else {
             // we are being restored: resume a previous game
@@ -120,7 +123,8 @@ public class LunarLander extends Activity {
      * Notification that something is about to happen, to give the Activity a
      * chance to save state.
      * 
-     * @param outState a Bundle into which this Activity should save its state
+     * @param outState
+     *            a Bundle into which this Activity should save its state
      */
     @Override
     protected void onSaveInstanceState(Bundle outState) {

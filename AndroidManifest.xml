@@ -23,7 +23,7 @@
     package="com.example.android.lunarlander">
 <uses-sdk></uses-sdk>
     <application android:icon="@drawable/app_lunar_lander" android:label="@string/app_name">
-        <activity android:name="LunarLander" android:theme="@android:style/Theme.NoTitleBar">
+        <activity android:name="com.example.android.lasergame.LaserGame" android:theme="@android:style/Theme.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
