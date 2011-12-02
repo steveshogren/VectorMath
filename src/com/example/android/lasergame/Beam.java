@@ -16,4 +16,7 @@ public class Beam {
         lines.add(l);
     }
     
+    public List<Line> getLines() {
+    	return lines;
+    }
 }
