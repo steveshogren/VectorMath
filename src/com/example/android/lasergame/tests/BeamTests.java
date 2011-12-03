@@ -25,4 +25,17 @@ public class BeamTests extends GeometryTestCase {
 			beam.getLines()
 		);
 	}
+
+	public void testEquality() {
+		Beam b1 = new Beam(makeLine(0, 0, 1, 1));
+		Beam b2 = new Beam(makeLine(0, 0, 1, 1));
+		
+		b1.addLine(makeLine(2, 0, 1, 1));
+		b2.addLine(makeLine(2, 0, 1, 1));
+	
+		b1.addLine(makeLine(3, 0, 1, 1));
+		b2.addLine(makeLine(3, 0, 1, 1));
+
+		assertEquals(b1, b2);
+	}
 }

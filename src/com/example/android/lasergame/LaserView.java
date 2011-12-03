@@ -441,10 +441,11 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
             for (Triangle triangle : obstacles) {
                 triangle.draw(canvas, paint);
             }
-            LineDrawer lineDrawer = new RealLineDrawer(canvas, mFiringLinePaint, mTargetingLinePaint);
-            LaserCalculator calc = new LaserCalculator(lineDrawer, mCanvasWidth, mCanvasHeight, obstacles);
-            calc.fireLaser(mDesiredDegrees, mFire);
-
+            Drawer lineDrawer = new RealDrawer(canvas, mFiringLinePaint, mTargetingLinePaint);
+            LaserCalculator calc = new LaserCalculator(mCanvasWidth, mCanvasHeight, obstacles);
+            Beam b = calc.fireLaser(mDesiredDegrees);
+            lineDrawer.draw(b, mFire);
+            
             canvas.drawText("Degrees: " + mDesiredDegrees, 50, 50, mFiringLinePaint);
             canvas.restore();
         }

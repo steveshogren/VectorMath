@@ -9,26 +9,23 @@ public class LaserCalculator {
     private int mCanvasWidth;
     private int mCanvasHeight;
     private double mDesiredDegrees;
-    private LineDrawer mLineDrawer;
     private double mMaxLeftSideDegrees;
     private Triangle[] mTriangles;
     private Beam mBeam;
-    
-    public LaserCalculator(LineDrawer lineDrawer, int canvasWidth, int canvasHeight) {
-        mLineDrawer = lineDrawer;
+
+    public LaserCalculator(int canvasWidth, int canvasHeight) {
         mCanvasWidth = canvasWidth;
         mCanvasHeight = canvasHeight;
         mTriangles = new Triangle[] {};
     }
 
-    public LaserCalculator(LineDrawer lineDrawer, int canvasWidth, int canvasHeight, Triangle[] triangles) {
-        mLineDrawer = lineDrawer;
+    public LaserCalculator(int canvasWidth, int canvasHeight, Triangle[] triangles) {
         mTriangles = triangles;
         mCanvasWidth = canvasWidth;
         mCanvasHeight = canvasHeight;
     }
 
-    public void fireLaser(double desiredDegrees, boolean firing) {
+    public Beam fireLaser(double desiredDegrees) {
         mDesiredDegrees = desiredDegrees;
         if (mDesiredDegrees < 5) {
             mDesiredDegrees = 5;
@@ -37,52 +34,50 @@ public class LaserCalculator {
         if (mDesiredDegrees > 175) {
             mDesiredDegrees = 175;
         }
-       
-        mBeam = new Beam(new Line(new Point(mCanvasWidth / 2, mCanvasHeight), new Point(0, 0)));
-        Line firstLine = mBeam.lines.get(0);
+
+        mBeam = new Beam();
+        Line firstLine = new Line(new Point(mCanvasWidth / 2, mCanvasHeight), new Point(0, 0));
 
         mMaxLeftSideDegrees = getMaxLeftSideDegrees(firstLine.p1);
         if (hittingLeftWall()) {
             firstLine.p2.y = (int) (mCanvasHeight - Math.tan(Math.toRadians(mDesiredDegrees)) * firstLine.p1.x);
-            if (!tryToReflect(firstLine, firing)) {
-                mLineDrawer.drawLine(firstLine, firing);
-                if (!firing)
-                    return;
+            if (!tryToReflect(firstLine)) {
+                mBeam.addLine(firstLine);
                 bounceRightThenLeft(firstLine);
             }
         } else if (hittingBackWall()) {
             if (firingStraightUp()) {
                 firstLine.p2.y = 0;
                 firstLine.p2.x = firstLine.p1.x;
-                mLineDrawer.drawLine(firstLine, firing);
-                return;
+                mBeam.addLine(firstLine);
+                return mBeam;
             } else if (hittingLeftSideOfBackWall()) {
-                firstLine.p2.x = (int) (firstLine.p1.x - Math.tan(Math.toRadians(180 - 90 - mDesiredDegrees)) * mCanvasHeight);
-                if (!tryToReflect(firstLine, firing)) {
-                    mLineDrawer.drawLine(firstLine, firing);
-                    return;
+                firstLine.p2.x = (int) (firstLine.p1.x - Math.tan(Math.toRadians(180 - 90 - mDesiredDegrees))
+                        * mCanvasHeight);
+                if (!tryToReflect(firstLine)) {
+                    mBeam.addLine(firstLine);
+                    return mBeam;
                 }
             } else { // hitting right side...
                 firstLine.p2.x = (int) (firstLine.p1.x + Math.tan(Math.toRadians(mDesiredDegrees - 90)) * mCanvasHeight);
-                if (!tryToReflect(firstLine, firing)) {
-                    mLineDrawer.drawLine(firstLine, firing);
-                    return;
+                if (!tryToReflect(firstLine)) {
+                    mBeam.addLine(firstLine);
+                    return mBeam;
                 }
             }
         } else { // hitting right wall
             firstLine.p2.x = mCanvasWidth;
             mDesiredDegrees = 180 - mDesiredDegrees;
             firstLine.p2.y = (int) (mCanvasHeight - Math.tan(Math.toRadians(mDesiredDegrees)) * firstLine.p1.x);
-            if (!tryToReflect(firstLine, firing)) {
-                mLineDrawer.drawLine(firstLine, firing);
-                if (!firing)
-                    return;
+            if (!tryToReflect(firstLine)) {
+                mBeam.addLine(firstLine);
                 bounceLeftThenRight(firstLine);
             }
         }
+        return mBeam;
     }
 
-    private boolean tryToReflect(Line line, boolean firing) {
+    private boolean tryToReflect(Line line) {
         for (Triangle triangle : mTriangles) {
             Point i1 = Intersection.detect(line, triangle.edges().get(0));
             Point i2 = Intersection.detect(line, triangle.edges().get(1));
@@ -100,7 +95,7 @@ public class LaserCalculator {
                 Collections.sort(p, new PointComparator(line.p1));
                 line.p2.x = p.get(0).x;
                 line.p2.y = p.get(0).y;
-                mLineDrawer.drawLine(line, firing);
+                mBeam.addLine(line);
                 // TODO: Start crazy reflection here...
                 return true;
             }
@@ -111,19 +106,16 @@ public class LaserCalculator {
     private void bounceLeftThenRight(Line line) {
         double nextAngle = 180 - (mDesiredDegrees + 90);
         // -----Heading left ----
-        line.p1.x = line.p2.x;
-        line.p1.y = line.p2.y;
-        line.p2.x = 0; // left wall
-        line.p2.y = 0; // back wall
+        Line l2 = new Line(new Point(line.p2.x, line.p2.y), new Point(0, 0));
 
-        line.p2.y = (int) (line.p1.y - (float) (Math.tan(Math.toRadians(mDesiredDegrees)) * line.p1.x));
-        if (line.p2.y > 0) { // left wall
-            mLineDrawer.drawLine(line, true);
-            bounceRightThenLeft(line);
+        l2.p2.y = (int) (l2.p1.y - (float) (Math.tan(Math.toRadians(mDesiredDegrees)) * l2.p1.x));
+        if (l2.p2.y > 0) { // left wall
+            mBeam.addLine(l2);
+            bounceRightThenLeft(l2);
         } else { // back wall
-            line.p2.y = 0;
-            line.p2.x = (int) (mCanvasWidth - Math.tan(Math.toRadians(nextAngle)) * line.p1.y);
-            mLineDrawer.drawLine(line, true);
+            l2.p2.y = 0;
+            l2.p2.x = (int) (mCanvasWidth - Math.tan(Math.toRadians(nextAngle)) * l2.p1.y);
+            mBeam.addLine(l2);
         }
     }
 
@@ -155,34 +147,29 @@ public class LaserCalculator {
     }
 
     private void bounceRightThenLeft(Line line) {
+        Line l2 = new Line(new Point(line.p2.x, line.p2.y), new Point(0, 0));
         // -----Heading right ---
-        line.p1.x = line.p2.x;
-        line.p1.y = line.p2.y;
-        line.p2.y = 0;
 
         double nextAngle = 180 - (mDesiredDegrees + 90);
-        line.p2.x = (int) (Math.tan(Math.toRadians(nextAngle)) * line.p1.y);
-        if (line.p2.x < mCanvasWidth) { // hitting back wall
-            mLineDrawer.drawLine(line, true);
+        l2.p2.x = (int) (Math.tan(Math.toRadians(nextAngle)) * l2.p1.y);
+        if (l2.p2.x < mCanvasWidth) { // hitting back wall
+            mBeam.addLine(l2);
         } else { // bounce off right wall
-            line.p2.x = mCanvasWidth;
-            line.p2.y = (int) (line.p1.y - (float) (Math.tan(Math.toRadians(mDesiredDegrees)) * mCanvasWidth));
-            mLineDrawer.drawLine(line, true);
+            l2.p2.x = mCanvasWidth;
+            l2.p2.y = (int) (l2.p1.y - (float) (Math.tan(Math.toRadians(mDesiredDegrees)) * mCanvasWidth));
+            mBeam.addLine(l2);
 
             // -----Heading left ----
-            line.p1.x = line.p2.x;
-            line.p1.y = line.p2.y;
-            line.p2.x = 0; // left wall
-            line.p2.y = 0; // back wall
+            Line l3 = new Line(new Point(l2.p2.x, l2.p2.y), new Point(0, 0));
 
-            line.p2.y = (int) (line.p1.y - (float) (Math.tan(Math.toRadians(mDesiredDegrees)) * line.p1.x));
-            if (line.p2.y > 0) { // left wall
-                mLineDrawer.drawLine(line, true);
-                bounceRightThenLeft(line);
+            l3.p2.y = (int) (l3.p1.y - (float) (Math.tan(Math.toRadians(mDesiredDegrees)) * l3.p1.x));
+            if (l3.p2.y > 0) { // left wall
+                mBeam.addLine(l3);
+                bounceRightThenLeft(l3);
             } else { // back wall
-                line.p2.y = 0;
-                line.p2.x = (int) (mCanvasWidth - Math.tan(Math.toRadians(nextAngle)) * line.p1.y);
-                mLineDrawer.drawLine(line, true);
+                l3.p2.y = 0;
+                l3.p2.x = (int) (mCanvasWidth - Math.tan(Math.toRadians(nextAngle)) * l3.p1.y);
+                mBeam.addLine(l3);
             }
         }
     }
