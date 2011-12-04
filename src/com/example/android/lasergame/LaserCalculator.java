@@ -12,28 +12,27 @@ public class LaserCalculator {
     private double mMaxLeftSideDegrees;
     private Triangle[] mTriangles;
     private Beam mBeam;
+	private double mMinimumLaserFiringAngle;
+	private double mMaximumLaserFiringAngle;
 
-    public LaserCalculator(int canvasWidth, int canvasHeight) {
+    public LaserCalculator(int canvasWidth, int canvasHeight, double minimumLaserFiringAngle, double maximumLaserFiringAngle) {
         mCanvasWidth = canvasWidth;
         mCanvasHeight = canvasHeight;
+        mMinimumLaserFiringAngle = minimumLaserFiringAngle;
+        mMaximumLaserFiringAngle = maximumLaserFiringAngle;
         mTriangles = new Triangle[] {};
     }
 
-    public LaserCalculator(int canvasWidth, int canvasHeight, Triangle[] triangles) {
+    public LaserCalculator(int canvasWidth, int canvasHeight, double minimumLaserFiringAngle, double maximumLaserFiringAngle, Triangle[] triangles) {
         mTriangles = triangles;
         mCanvasWidth = canvasWidth;
         mCanvasHeight = canvasHeight;
+        mMinimumLaserFiringAngle = minimumLaserFiringAngle;
+        mMaximumLaserFiringAngle = maximumLaserFiringAngle;
     }
 
     public Beam fireLaser(double desiredDegrees) {
-        mDesiredDegrees = desiredDegrees;
-        if (mDesiredDegrees < 5) {
-            mDesiredDegrees = 5;
-        }
-
-        if (mDesiredDegrees > 175) {
-            mDesiredDegrees = 175;
-        }
+        setDesiredDegrees(desiredDegrees);
 
         mBeam = new Beam();
         Line firstLine = new Line(new Point(mCanvasWidth / 2, mCanvasHeight), new Point(0, 0));
@@ -76,6 +75,11 @@ public class LaserCalculator {
         }
         return mBeam;
     }
+
+	private void setDesiredDegrees(double desiredDegrees) {
+		mDesiredDegrees = Math.max(desiredDegrees, mMinimumLaserFiringAngle);
+        mDesiredDegrees = Math.min(desiredDegrees, mMaximumLaserFiringAngle);
+	}
 
     private boolean tryToReflect(Line line) {
         for (Triangle triangle : mTriangles) {

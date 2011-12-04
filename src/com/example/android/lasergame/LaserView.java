@@ -61,6 +61,9 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
         public static final int UI_BAR = 100; // width of the bar(s)
         public static final int UI_BAR_HEIGHT = 10; // height of the bar(s)
         private static final String KEY_FUEL = "mFuel";
+        
+        private static final double MINIMUM_LASER_ANGLE = 5.0;
+        private static final double MAXIMUM_LASER_ANGLE = 175.0;
 
         /*
          * Member (state) fields
@@ -370,13 +373,13 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
                         return true;
                         // left/q -> left
                     } else if (keyCode == KeyEvent.KEYCODE_DPAD_UP || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
-                        if (mDesiredDegrees < 175) {
+                        if (mDesiredDegrees < MAXIMUM_LASER_ANGLE) {
                             mDesiredDegrees++;
                         }
                         return true;
                         // right/w -> right
                     } else if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN || keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
-                        if (mDesiredDegrees > 5) {
+                        if (mDesiredDegrees > MINIMUM_LASER_ANGLE) {
                             mDesiredDegrees--;
                         }
                         return true;
@@ -442,7 +445,7 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
                 triangle.draw(canvas, paint);
             }
             Drawer lineDrawer = new RealDrawer(canvas, mFiringLinePaint, mTargetingLinePaint);
-            LaserCalculator calc = new LaserCalculator(mCanvasWidth, mCanvasHeight, obstacles);
+            LaserCalculator calc = new LaserCalculator(mCanvasWidth, mCanvasHeight, MINIMUM_LASER_ANGLE, MAXIMUM_LASER_ANGLE, obstacles);
             Beam b = calc.fireLaser(mDesiredDegrees);
             lineDrawer.draw(b, mFire);
             

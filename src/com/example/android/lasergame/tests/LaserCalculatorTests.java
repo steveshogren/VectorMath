@@ -12,7 +12,7 @@ public class LaserCalculatorTests extends TestCase {
     private LaserCalculator mCalc;
 
     public void setUp() {
-        mCalc = new LaserCalculator(100, 100);
+        mCalc = new LaserCalculator(100, 100, 5.0, 175.0);
     }
 
     public void test45Degrees() {
@@ -24,7 +24,7 @@ public class LaserCalculatorTests extends TestCase {
 
     public void test45DegreesWithTriangle() {
         Triangle[] t = { new Triangle(new Point(0, 0), new Point(50, 0), new Point(0, 50)) };
-        mCalc = new LaserCalculator(100, 100, t);
+        mCalc = new LaserCalculator(100, 100, 5.0, 175.0, t);
 
         Beam b = mCalc.fireLaser(65);
         Beam e = new Beam(new Line(new Point(50, 100), new Point(3, 0)));
@@ -34,7 +34,7 @@ public class LaserCalculatorTests extends TestCase {
     
     public void testReflectingOffAt45Degrees() {
         Triangle[] t = { new Triangle(new Point(0, 30), new Point(70, 30), new Point(0, 100)) };
-        mCalc = new LaserCalculator(100, 100, t);
+        mCalc = new LaserCalculator(100, 100, 5.0, 175.0, t);
 
         Beam b = mCalc.fireLaser(90);
         Beam e = new Beam();
@@ -45,7 +45,7 @@ public class LaserCalculatorTests extends TestCase {
     
     public void testReflectingOffAt60Degrees() {
         Triangle[] t = { new Triangle(new Point(1, 70), new Point(70, 1), new Point(1, 1)) };
-        mCalc = new LaserCalculator(100, 100, t);
+        mCalc = new LaserCalculator(100, 100, 5.0, 175.0, t);
 
         Beam b = mCalc.fireLaser(60);
         Beam e = new Beam();
