@@ -12,23 +12,23 @@ public class LaserCalculator {
     private double mMaxLeftSideDegrees;
     private Triangle[] mTriangles;
     private Beam mBeam;
-	private double mMinimumLaserFiringAngle;
-	private double mMaximumLaserFiringAngle;
+	private double mMinimumFiringAngle;
+	private double mMaximumFiringAngle;
 
-    public LaserCalculator(int canvasWidth, int canvasHeight, double minimumLaserFiringAngle, double maximumLaserFiringAngle) {
+    public LaserCalculator(int canvasWidth, int canvasHeight, double minimumFiringAngle, double maximumFiringAngle) {
         mCanvasWidth = canvasWidth;
         mCanvasHeight = canvasHeight;
-        mMinimumLaserFiringAngle = minimumLaserFiringAngle;
-        mMaximumLaserFiringAngle = maximumLaserFiringAngle;
+        mMinimumFiringAngle = minimumFiringAngle;
+        mMaximumFiringAngle = maximumFiringAngle;
         mTriangles = new Triangle[] {};
     }
 
-    public LaserCalculator(int canvasWidth, int canvasHeight, double minimumLaserFiringAngle, double maximumLaserFiringAngle, Triangle[] triangles) {
+    public LaserCalculator(int canvasWidth, int canvasHeight, double minimumFiringAngle, double maximumFiringAngle, Triangle[] triangles) {
         mTriangles = triangles;
         mCanvasWidth = canvasWidth;
         mCanvasHeight = canvasHeight;
-        mMinimumLaserFiringAngle = minimumLaserFiringAngle;
-        mMaximumLaserFiringAngle = maximumLaserFiringAngle;
+        mMinimumFiringAngle = minimumFiringAngle;
+        mMaximumFiringAngle = maximumFiringAngle;
     }
 
     public Beam fireLaser(double desiredDegrees) {
@@ -77,8 +77,8 @@ public class LaserCalculator {
     }
 
 	private void setDesiredDegrees(double desiredDegrees) {
-		mDesiredDegrees = Math.max(desiredDegrees, mMinimumLaserFiringAngle);
-        mDesiredDegrees = Math.min(desiredDegrees, mMaximumLaserFiringAngle);
+		mDesiredDegrees = Math.max(desiredDegrees, mMinimumFiringAngle);
+        mDesiredDegrees = Math.min(desiredDegrees, mMaximumFiringAngle);
 	}
 
     private boolean tryToReflect(Line line) {
