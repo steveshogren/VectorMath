@@ -1,5 +1,9 @@
 package com.example.android.lasergame;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class Intersection {
 
     // Returns the intersection if one exists, null if not
@@ -133,6 +137,39 @@ public class Intersection {
 
             // The lines do intersect, but the line segments do not
             return false;
+        }
+    }
+
+    public static Intersects whichEdgeDoesTheLinePassThroughFirst(Triangle[] t, Line line) {
+        for (Triangle triangle : t) {
+            Point i1 = Intersection.detect(line, triangle.edges().get(0));
+            Point i2 = Intersection.detect(line, triangle.edges().get(1));
+            Point i3 = Intersection.detect(line, triangle.edges().get(2));
+
+            Intersection i =  new Intersection();
+            List<Intersects> p = new ArrayList<Intersects>();
+            if (i1 != null) {
+                p.add(i.new Intersects(i1, triangle.edges().get(0)));
+            } 
+            if (i2 != null) {
+                p.add(i.new Intersects(i2, triangle.edges().get(1)));
+            } 
+            if (i3 != null) {
+                p.add(i.new Intersects(i3, triangle.edges().get(2)));
+            }
+            if (!p.isEmpty()) {
+                Collections.sort(p, new PointComparator(line.p1));
+                return p.get(0);
+            }
+        }
+        return null;
+    }
+    public class Intersects {
+        public Line edge;
+        public Point intersectionP;
+        public Intersects(Point p, Line l) {
+            edge = l;
+            intersectionP = p;
         }
     }
 }

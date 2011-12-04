@@ -1,8 +1,10 @@
 package com.example.android.lasergame.tests;
 
 import com.example.android.lasergame.Intersection;
+import com.example.android.lasergame.Intersection.Intersects;
 import com.example.android.lasergame.Line;
 import com.example.android.lasergame.Point;
+import com.example.android.lasergame.Triangle;
 
 import junit.framework.TestCase;
 
@@ -74,5 +76,14 @@ public class IntersectionTests extends TestCase {
         Point point = Intersection.detect(new Line(new Point(1, 1), new Point(3, 1)), new Line(new Point(4, 2),
                 new Point(4, 4)));
         assertNull("point: " + point, point);
+    }
+
+    public void testReflectingOffAt45Degrees() {
+        Triangle[] t = { new Triangle(new Point(1, 30), new Point(70, 30), new Point(1, 100)) };
+        
+        Intersects l = Intersection.whichEdgeDoesTheLinePassThroughFirst(t, new Line(new Point(50, 100), new Point(50, 0)));
+
+        Line e = new Line(new Point(70, 30), new Point(1, 100));
+        assertEquals(e, l.edge);
     }
 }
