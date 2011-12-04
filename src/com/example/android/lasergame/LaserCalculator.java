@@ -84,19 +84,37 @@ public class LaserCalculator {
             Point i3 = Intersection.detect(line, triangle.edges().get(2));
 
             List<Point> p = new ArrayList<Point>();
+            Line l = null;
             if (i1 != null) {
                 p.add(i1);
+                l = triangle.edges().get(0); 
             } else if (i2 != null) {
                 p.add(i2);
+                l = triangle.edges().get(1); 
             } else if (i3 != null) {
                 p.add(i3);
+                l = triangle.edges().get(2); 
             }
             if (!p.isEmpty()) {
                 Collections.sort(p, new PointComparator(line.p1));
                 line.p2.x = p.get(0).x;
                 line.p2.y = p.get(0).y;
                 mBeam.addLine(line);
-                // TODO: Start crazy reflection here...
+                
+                // start bouncing!!!!
+                Vector2 n1 = new Vector2(l.p1.x, l.p1.y);
+                Vector2 n2 = new Vector2(l.p2.x, l.p2.y);
+                Vector2 nN = n1.cpy().add(n2).nor();
+                Vector2 v1 = new Vector2(line.p1.x, line.p1.y);
+                Vector2 v2 = new Vector2(line.p2.x, line.p2.y);
+                Vector2 vN = v2.cpy().sub(v1).nor();
+                
+                Vector2 u = nN.cpy().mul(vN.dot(nN));
+                Vector2 w = vN.cpy().sub(u);
+                Vector2 vPrime = w.cpy().sub(u);
+                Line next = new Line(new Point(line.p2.x, line.p2.y), new Point(100, 0));
+                next.p2.y = (int) (((vPrime.y/vPrime.x) * (100 - line.p2.x)) + line.p2.y);
+                mBeam.addLine(next);
                 return true;
             }
         }
@@ -148,8 +166,8 @@ public class LaserCalculator {
 
     private void bounceRightThenLeft(Line line) {
         Line l2 = new Line(new Point(line.p2.x, line.p2.y), new Point(0, 0));
+        
         // -----Heading right ---
-
         double nextAngle = 180 - (mDesiredDegrees + 90);
         l2.p2.x = (int) (Math.tan(Math.toRadians(nextAngle)) * l2.p1.y);
         if (l2.p2.x < mCanvasWidth) { // hitting back wall
@@ -158,19 +176,7 @@ public class LaserCalculator {
             l2.p2.x = mCanvasWidth;
             l2.p2.y = (int) (l2.p1.y - (float) (Math.tan(Math.toRadians(mDesiredDegrees)) * mCanvasWidth));
             mBeam.addLine(l2);
-
-            // -----Heading left ----
-            Line l3 = new Line(new Point(l2.p2.x, l2.p2.y), new Point(0, 0));
-
-            l3.p2.y = (int) (l3.p1.y - (float) (Math.tan(Math.toRadians(mDesiredDegrees)) * l3.p1.x));
-            if (l3.p2.y > 0) { // left wall
-                mBeam.addLine(l3);
-                bounceRightThenLeft(l3);
-            } else { // back wall
-                l3.p2.y = 0;
-                l3.p2.x = (int) (mCanvasWidth - Math.tan(Math.toRadians(nextAngle)) * l3.p1.y);
-                mBeam.addLine(l3);
-            }
+            bounceLeftThenRight(l2);
         }
     }
 }
