@@ -150,9 +150,17 @@ public class LaserCalculator {
     }
 
     /**
-     * x ------------>x ****************** y *T* * | * * * | * * * | * * * | * *
-     * * y * M* * ****************** Returns the maximum number of degrees this
-     * map supports while still hitting the left wall
+     *     x ------------>x
+     *    ******************                                                   
+     *  y *T*              *                                                   
+     *  | *   *            *                                                   
+     *  | *    *           *                                                   
+     *  | *     *          *                                                   
+     *  | *       *        *                                                   
+     *  y *        M*      *                                                   
+     *    ******************
+     * Returns the maximum number of degrees this map supports while still 
+     * hitting the left wall
      */
     private double getMaxLeftSideDegrees(Point startPoint) {
         double T = Math.atan2(startPoint.x, startPoint.y) * 180.0F / Math.PI;
