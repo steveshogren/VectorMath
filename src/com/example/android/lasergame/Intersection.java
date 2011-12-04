@@ -149,13 +149,13 @@ public class Intersection {
             Intersection i =  new Intersection();
             List<Intersects> p = new ArrayList<Intersects>();
             if (i1 != null) {
-                p.add(i.new Intersects(i1, triangle.edges().get(0)));
+                p.add(i.new Intersects(i1, triangle.edges().get(0), triangle));
             } 
             if (i2 != null) {
-                p.add(i.new Intersects(i2, triangle.edges().get(1)));
+                p.add(i.new Intersects(i2, triangle.edges().get(1), triangle));
             } 
             if (i3 != null) {
-                p.add(i.new Intersects(i3, triangle.edges().get(2)));
+                p.add(i.new Intersects(i3, triangle.edges().get(2), triangle));
             }
             if (!p.isEmpty()) {
                 Collections.sort(p, new PointComparator(line.p1));
@@ -167,9 +167,15 @@ public class Intersection {
     public class Intersects {
         public Line edge;
         public Point intersectionP;
+        public Triangle triangle;
         public Intersects(Point p, Line l) {
             edge = l;
             intersectionP = p;
+        }
+        public Intersects(Point p, Line l, Triangle t) {
+            edge = l;
+            intersectionP = p;
+            triangle = t;
         }
     }
 }

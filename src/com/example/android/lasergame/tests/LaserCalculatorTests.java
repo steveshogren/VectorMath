@@ -40,8 +40,8 @@ public class LaserCalculatorTests extends TestCase {
 
         Beam b = mCalc.fireLaser(91);
         Beam e = new Beam();
-        e.addLine(new Line(new Point(50, 100), new Point(50, 49)));
-        e.addLine(new Line(new Point(50, 49), new Point(100, 48)));
+        e.addLine(new Line(new Point(50, 100), new Point(50, 50)));
+        e.addLine(new Line(new Point(50, 50), new Point(0, 50)));
         assertEquals(e, b);
     }
 

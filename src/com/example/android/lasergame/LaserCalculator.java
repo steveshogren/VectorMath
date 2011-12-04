@@ -100,9 +100,26 @@ public class LaserCalculator {
             Vector2 u = nN.cpy().mul(vN.dot(nN));
             Vector2 w = vN.cpy().sub(u);
             Vector2 vPrime = w.cpy().sub(u);
+            
             Line next = new Line(new Point(line.p2.x, line.p2.y), new Point(mCanvasWidth, 0));
             next.p2.y = (int) (((vPrime.y / vPrime.x) * (mCanvasWidth - line.p2.x)) + line.p2.y);
+       
+            boolean goLeft = false;
+            for (Line tLine : intersects.triangle.edges()) {
+                if (tLine != intersects.edge && Intersection.detect(tLine, next) != null) {
+                    next = new Line(new Point(line.p2.x, line.p2.y), new Point(0, 0));
+                    next.p2.y = (int) (((vPrime.y / vPrime.x) * (0 - line.p2.x)) + line.p2.y);
+                    goLeft = true;
+                }
+            }
+           
+            
             mBeam.addLine(next);
+//            if (goLeft) {
+//                bounceLeftThenRight(next);
+//            } else {
+//                bounceRightThenLeft(next);
+//            }
             return true;
         }
         return false;
