@@ -5,68 +5,40 @@ import android.util.FloatMath;
 public class Vector2 {
     public static float TO_RADIANS = (1 / 180.0f) * (float) Math.PI;
     public static float TO_DEGREES = (1 / (float) Math.PI) * 180;
-    public float x, y;
-
-    public Vector2() {
-    }
+    protected float x, y;
 
     public Vector2(float x, float y) {
         this.x = x;
         this.y = y;
     }
 
-    public String toString() {
-        return "<" + x + ", " + y + ">";
-    }
     public Vector2(Vector2 other) {
         this.x = other.x;
         this.y = other.y;
     }
-
-    public Vector2 cpy() {
-        return new Vector2(x, y);
-    }
-
-    public Vector2 set(float x, float y) {
-        this.x = x;
-        this.y = y;
-        return this;
-    }
-
-    public Vector2 set(Vector2 other) {
-        this.x = other.x;
-        this.y = other.y;
-        return this;
+    
+    public String toString() {
+        return "<" + x + ", " + y + ">";
     }
 
     public Vector2 add(float x, float y) {
-        this.x += x;
-        this.y += y;
-        return this;
+        return new Vector2(this.x + x, this.y + y);
     }
 
     public Vector2 add(Vector2 other) {
-        this.x += other.x;
-        this.y += other.y;
-        return this;
+        return add(other.x, other.y);
     }
 
     public Vector2 sub(float x, float y) {
-        this.x -= x;
-        this.y -= y;
-        return this;
+        return new Vector2(this.x - x, this.y - y);
     }
 
     public Vector2 sub(Vector2 other) {
-        this.x -= other.x;
-        this.y -= other.y;
-        return this;
+        return sub(other.x, other.y);
     }
 
     public Vector2 mul(float scalar) {
-        this.x *= scalar;
-        this.y *= scalar;
-        return this;
+        return new Vector2(x * scalar, y * scalar);
     }
 
     public float len() {
@@ -75,12 +47,14 @@ public class Vector2 {
 
     // makes it a unit vector
     public Vector2 nor() {
-        float len = len();
+        float len = len(), unitX = this.x, unitY = this.y;
+        
         if (len != 0) {
-            this.x /= len;
-            this.y /= len;
-        }
-        return this;
+            unitX /= len;
+            unitY /= len;
+        } 
+        
+        return new Vector2(unitX, unitY);
     }
 
     public float angle() {
@@ -103,10 +77,7 @@ public class Vector2 {
         float newX = this.x * cos - this.y * sin;
         float newY = this.x * sin + this.y * cos;
 
-        this.x = newX;
-        this.y = newY;
-
-        return this;
+        return new Vector2(newX, newY);
     }
 
     public float dist(Vector2 other) {
