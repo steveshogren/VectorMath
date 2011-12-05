@@ -1,8 +1,6 @@
 package com.example.android.lasergame;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import com.example.android.lasergame.Intersection.Intersects;
 
 public class LaserCalculator {
 
@@ -82,45 +80,51 @@ public class LaserCalculator {
 	}
 
     private boolean tryToReflect(Line line) {
-        for (Triangle triangle : mTriangles) {
-            Point i1 = Intersection.detect(line, triangle.edges().get(0));
-            Point i2 = Intersection.detect(line, triangle.edges().get(1));
-            Point i3 = Intersection.detect(line, triangle.edges().get(2));
+        Intersects intersects = Intersection.whichEdgeDoesTheLinePassThroughFirst(mTriangles, line);
+        
+        if (intersects != null) {
+            Line l = intersects.edge;
+            Point p = intersects.intersectionP;
+            line.p2.x = p.x;
+            line.p2.y = p.y;
+            mBeam.addLine(line);
 
-            List<Point> p = new ArrayList<Point>();
-            Line l = null;
-            if (i1 != null) {
-                p.add(i1);
-                l = triangle.edges().get(0); 
-            } else if (i2 != null) {
-                p.add(i2);
-                l = triangle.edges().get(1); 
-            } else if (i3 != null) {
-                p.add(i3);
-                l = triangle.edges().get(2); 
+            // start bouncing!!!!
+            Vector2 n1 = new Vector2(l.p1.x, l.p1.y);
+            Vector2 n2 = new Vector2(l.p2.x, l.p2.y);
+            Vector2 nN = n1.cpy().add(n2).nor();
+            Vector2 lineNorm = n1.cpy().sub(n2).nor();
+            Vector2 nNPerp = new Vector2(-lineNorm.y, lineNorm.x);
+
+            nN = nNPerp;
+            Vector2 v1 = new Vector2(line.p1.x, line.p1.y);
+            Vector2 v2 = new Vector2(line.p2.x, line.p2.y);
+            Vector2 vN = v2.cpy().sub(v1).nor();
+
+            Vector2 u = nN.cpy().mul(vN.dot(nN));
+            Vector2 w = vN.cpy().sub(u);
+            Vector2 vPrime = w.cpy().sub(u);
+            
+            Line next = new Line(new Point(line.p2.x, line.p2.y), new Point(mCanvasWidth, 0));
+            next.p2.y = (int) (((vPrime.y / vPrime.x) * (mCanvasWidth - line.p2.x)) + line.p2.y);
+       
+            boolean goLeft = false;
+            for (Line tLine : intersects.triangle.edges()) {
+                if (tLine != intersects.edge && Intersection.detect(tLine, next) != null) {
+                    next = new Line(new Point(line.p2.x, line.p2.y), new Point(0, 0));
+                    next.p2.y = (int) (((vPrime.y / vPrime.x) * (0 - line.p2.x)) + line.p2.y);
+                    goLeft = true;
+                }
             }
-            if (!p.isEmpty()) {
-                Collections.sort(p, new PointComparator(line.p1));
-                line.p2.x = p.get(0).x;
-                line.p2.y = p.get(0).y;
-                mBeam.addLine(line);
-                
-                // start bouncing!!!!
-                Vector2 n1 = new Vector2(l.p1.x, l.p1.y);
-                Vector2 n2 = new Vector2(l.p2.x, l.p2.y);
-                Vector2 nN = n1.add(n2).nor();
-                Vector2 v1 = new Vector2(line.p1.x, line.p1.y);
-                Vector2 v2 = new Vector2(line.p2.x, line.p2.y);
-                Vector2 vN = v2.sub(v1).nor();
-                
-                Vector2 u = nN.mul(vN.dot(nN));
-                Vector2 w = vN.sub(u);
-                Vector2 vPrime = w.sub(u);
-                Line next = new Line(new Point(line.p2.x, line.p2.y), new Point(100, 0));
-                next.p2.y = (int) (((vPrime.y/vPrime.x) * (100 - line.p2.x)) + line.p2.y);
-                mBeam.addLine(next);
-                return true;
-            }
+           
+            
+            mBeam.addLine(next);
+//            if (goLeft) {
+//                bounceLeftThenRight(next);
+//            } else {
+//                bounceRightThenLeft(next);
+//            }
+            return true;
         }
         return false;
     }
@@ -178,7 +182,7 @@ public class LaserCalculator {
 
     private void bounceRightThenLeft(Line line) {
         Line l2 = new Line(new Point(line.p2.x, line.p2.y), new Point(0, 0));
-        
+
         // -----Heading right ---
         double nextAngle = 180 - (mDesiredDegrees + 90);
         l2.p2.x = (int) (Math.tan(Math.toRadians(nextAngle)) * l2.p1.y);

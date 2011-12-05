@@ -22,27 +22,29 @@ public class LaserCalculatorTests extends TestCase {
         assertEquals(e, b);
     }
 
-    public void test45DegreesWithTriangle() {
-        Triangle[] t = { new Triangle(new Point(0, 0), new Point(50, 0), new Point(0, 50)) };
-        mCalc = new LaserCalculator(100, 100, 5.0, 175.0, t);
-
-        Beam b = mCalc.fireLaser(65);
-        Beam e = new Beam(new Line(new Point(50, 100), new Point(3, 0)));
-        assertEquals(e, b);
-        
-    }
     
     public void testReflectingOffAt45Degrees() {
-        Triangle[] t = { new Triangle(new Point(0, 30), new Point(70, 30), new Point(0, 100)) };
+        Triangle[] t = { new Triangle(new Point(1, 30), new Point(70, 30), new Point(1, 100)) };
         mCalc = new LaserCalculator(100, 100, 5.0, 175.0, t);
 
-        Beam b = mCalc.fireLaser(90);
+        Beam b = mCalc.fireLaser(91);
         Beam e = new Beam();
-        e.addLine(new Line(new Point(50, 100), new Point(50, 50)));
-        e.addLine(new Line(new Point(50, 50), new Point(100, 50)));
+        e.addLine(new Line(new Point(50, 100), new Point(50, 49)));
+        e.addLine(new Line(new Point(50, 49), new Point(100, 48)));
         assertEquals(e, b);
     }
     
+    public void testReflectingOffAt45DegreesToLeft() {
+        Triangle[] t = { new Triangle(new Point(100, 30), new Point(30, 30), new Point(100, 100)) };
+        mCalc = new LaserCalculator(100, 100, 5.0, 175.0, t);
+
+        Beam b = mCalc.fireLaser(91);
+        Beam e = new Beam();
+        e.addLine(new Line(new Point(50, 100), new Point(50, 50)));
+        e.addLine(new Line(new Point(50, 50), new Point(0, 50)));
+        assertEquals(e, b);
+    }
+
     public void testReflectingOffAt60Degrees() {
         Triangle[] t = { new Triangle(new Point(1, 70), new Point(70, 1), new Point(1, 1)) };
         mCalc = new LaserCalculator(100, 100, 5.0, 175.0, t);
