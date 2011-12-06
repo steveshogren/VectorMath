@@ -76,7 +76,7 @@ public class LaserCalculator {
 
 	private void setDesiredDegrees(double desiredDegrees) {
 		mDesiredDegrees = Math.max(desiredDegrees, mMinimumFiringAngle);
-        mDesiredDegrees = Math.min(desiredDegrees, mMaximumFiringAngle);
+        mDesiredDegrees = Math.min(mDesiredDegrees, mMaximumFiringAngle);
 	}
 
     private boolean tryToReflect(Line line) {
@@ -92,18 +92,18 @@ public class LaserCalculator {
             // start bouncing!!!!
             Vector2 n1 = new Vector2(l.p1.x, l.p1.y);
             Vector2 n2 = new Vector2(l.p2.x, l.p2.y);
-            Vector2 nN = n1.cpy().add(n2).nor();
-            Vector2 lineNorm = n1.cpy().sub(n2).nor();
+            Vector2 nN = n1.add(n2).nor();
+            Vector2 lineNorm = n1.sub(n2).nor();
             Vector2 nNPerp = new Vector2(-lineNorm.y, lineNorm.x);
 
             nN = nNPerp;
             Vector2 v1 = new Vector2(line.p1.x, line.p1.y);
             Vector2 v2 = new Vector2(line.p2.x, line.p2.y);
-            Vector2 vN = v2.cpy().sub(v1).nor();
+            Vector2 vN = v2.sub(v1).nor();
 
-            Vector2 u = nN.cpy().mul(vN.dot(nN));
-            Vector2 w = vN.cpy().sub(u);
-            Vector2 vPrime = w.cpy().sub(u);
+            Vector2 u = nN.mul(vN.dot(nN));
+            Vector2 w = vN.sub(u);
+            Vector2 vPrime = w.sub(u);
             
             Line next = new Line(new Point(line.p2.x, line.p2.y), new Point(mCanvasWidth, 0));
             next.p2.y = (int) (((vPrime.y / vPrime.x) * (mCanvasWidth - line.p2.x)) + line.p2.y);
@@ -119,6 +119,7 @@ public class LaserCalculator {
            
             
             mBeam.addLine(next);
+            
 //            if (goLeft) {
 //                bounceLeftThenRight(next);
 //            } else {
