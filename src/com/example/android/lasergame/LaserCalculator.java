@@ -114,7 +114,7 @@ public class LaserCalculator {
 
             // hitting a wall
             Intersects nextIntersects = Intersection.whichEdgeDoesTheLinePassThroughFirst(mTriangles, walls, next);
-            if (nextIntersects != null && nextIntersects.triangle == null) { // there's
+            if (nextIntersects == null || (nextIntersects != null && nextIntersects.triangle == null)) { // there's
                                                                              // that
                                                                              // overloading
                 // again... sigh
@@ -122,6 +122,10 @@ public class LaserCalculator {
                                                             // direction
                     next = new Line(new Point(incomingLine.p2.x, incomingLine.p2.y), new Point(0, 0));
                     next.p2.y = (int) (((vPrime.y / vPrime.x) * (0 - incomingLine.p2.x)) + incomingLine.p2.y);
+                    if (next.p2.y < 0) {
+                        next.p2.y = 0;
+                        next.p2.x = (int) (((vPrime.y / vPrime.x) * (0 - incomingLine.p2.y)) + incomingLine.p2.x);
+                    }
                 }
             } else {
                 // hitting a triangle

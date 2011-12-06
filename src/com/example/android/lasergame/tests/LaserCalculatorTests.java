@@ -22,6 +22,13 @@ public class LaserCalculatorTests extends TestCase {
         assertEquals(e, b);
     }
 
+    public void test135Degrees() {
+        Beam b = mCalc.fireLaser(135);
+        Beam e = new Beam(new Line(new Point(50, 100), new Point(100, 50)));
+        e.addLine(new Line(new Point(100, 50), new Point(49, 0)));
+        assertEquals(e, b);
+    }
+
     
     public void testReflectingOffAt45Degrees() {
         Triangle[] t = { new Triangle(new Point(1, 30), new Point(70, 30), new Point(1, 100)) };
