@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.example.android.lasergame.LaserView.LaserThread;
@@ -95,9 +96,12 @@ public class LaserGame extends Activity {
         // get handles to the LunarView from XML, and its LunarThread
         mLaserView = (LaserView) findViewById(R.id.lunar);
         mLaserThread = mLaserView.getThread();
+        
 
         // give the LunarView a handle to the TextView used for messages
         mLaserView.setTextView((TextView) findViewById(R.id.text));
+        mLaserView.setSeekBar((SeekBar) findViewById(R.id.seekBar1));
+        mLaserView.setOnTouchListener(mLaserView);
 
         if (savedInstanceState == null) {
             // we were just launched: set up a new game

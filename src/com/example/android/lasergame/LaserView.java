@@ -30,9 +30,12 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
 /**
@@ -44,7 +47,8 @@ import android.widget.TextView;
  * ship, and does an invalidate() to prompt another draw() as soon as possible
  * by the system.
  */
-class LaserView extends SurfaceView implements SurfaceHolder.Callback {
+class LaserView extends SurfaceView implements SurfaceHolder.Callback, SeekBar.OnSeekBarChangeListener,
+        View.OnTouchListener {
     class LaserThread extends Thread {
         /*
          * State-tracking constants
@@ -61,7 +65,7 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
         public static final int UI_BAR = 100; // width of the bar(s)
         public static final int UI_BAR_HEIGHT = 10; // height of the bar(s)
         private static final String KEY_FUEL = "mFuel";
-        
+
         private static final double MINIMUM_LASER_ANGLE = 5.0;
         private static final double MAXIMUM_LASER_ANGLE = 175.0;
 
@@ -85,10 +89,13 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
          */
         private int mCanvasWidth = 1;
 
-        private double mDesiredDegrees = 45;
+        private double mDesiredDegrees = 5;
 
         /** Fuel remaining */
         private double mFuel;
+
+        /** shots remaining */
+        private int mShots;
 
         /** Message handler used by thread to interact with TextView */
         private Handler mHandler;
@@ -118,6 +125,9 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
         private boolean mFire;
 
         public LaserThread(SurfaceHolder surfaceHolder, Context context, Handler handler) {
+            mFuel = 0;
+            mShots = 3;
+
             // get handles to some important objects
             mSurfaceHolder = surfaceHolder;
             mHandler = handler;
@@ -131,12 +141,10 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
             mFiringLinePaint = new Paint();
             mFiringLinePaint.setAntiAlias(true);
             mFiringLinePaint.setColor(android.graphics.Color.RED);
-            // mFiringLinePaint.setARGB(255, 0, 255, 0);
 
             mTargetingLinePaint = new Paint();
             mTargetingLinePaint.setAntiAlias(true);
             mTargetingLinePaint.setColor(android.graphics.Color.GREEN);
-            // mTargetingLinePaint.setARGB(255, 120, 180, 0);
 
             mLinePaintBad = new Paint();
             mLinePaintBad.setAntiAlias(true);
@@ -149,6 +157,9 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
          */
         public void doStart() {
             synchronized (mSurfaceHolder) {
+                mFire = false;
+                mShots = 4;
+                mDesiredDegrees = 5;
                 setState(STATE_RUNNING);
             }
         }
@@ -174,6 +185,7 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
         public synchronized void restoreState(Bundle savedState) {
             synchronized (mSurfaceHolder) {
                 setState(STATE_PAUSE);
+                mShots = savedState.getInt("mShots");
                 mFuel = savedState.getDouble(KEY_FUEL);
             }
         }
@@ -209,6 +221,7 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
             synchronized (mSurfaceHolder) {
                 if (map != null) {
                     map.putDouble(KEY_FUEL, Double.valueOf(mFuel));
+                    map.putInt("mShots", mShots);
                 }
             }
             return map;
@@ -219,7 +232,25 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
          */
         public void setFiring(boolean firing) {
             synchronized (mSurfaceHolder) {
+                if (mMode == STATE_WIN) {
+                    firing = true;
+                }
+                mFire = firing;
+            }
+        }
 
+        public void useShot() {
+            synchronized (mSurfaceHolder) {
+                mShots--;
+                if (mShots == 0) {
+                    setState(STATE_LOSE);
+                }
+            }
+        }
+
+        public void win() {
+            synchronized (mSurfaceHolder) {
+                setState(STATE_WIN);
             }
         }
 
@@ -252,6 +283,7 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
          */
         public void setState(int mode) {
             synchronized (mSurfaceHolder) {
+                mFire = true;
                 setState(mode, null);
             }
         }
@@ -288,9 +320,9 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
                     mFire = false;
                     Resources res = mContext.getResources();
                     CharSequence str = "";
-                    if (mMode == STATE_READY)
+                    if (mMode == STATE_READY) {
                         str = res.getText(R.string.mode_ready);
-                    else if (mMode == STATE_PAUSE)
+                    } else if (mMode == STATE_PAUSE)
                         str = res.getText(R.string.mode_pause);
                     else if (mMode == STATE_LOSE)
                         str = res.getText(R.string.mode_lose);
@@ -357,16 +389,7 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
                 if (keyCode == KeyEvent.KEYCODE_S)
                     okStart = true;
 
-                if (okStart && (mMode == STATE_READY || mMode == STATE_LOSE || mMode == STATE_WIN)) {
-                    // ready-to-start -> start
-                    doStart();
-                    return true;
-                } else if (mMode == STATE_PAUSE && okStart) {
-                    // paused -> running
-                    unpause();
-                    return true;
-                } else if (mMode == STATE_RUNNING) {
-
+                if (mMode == STATE_RUNNING) {
                     // center/space -> fire
                     if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER || keyCode == KeyEvent.KEYCODE_SPACE) {
                         fire();
@@ -384,9 +407,42 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
                         }
                         return true;
                     }
+                } else {
+                    changeState(okStart);
+                    return true;
                 }
-
                 return false;
+            }
+        }
+
+        public boolean changeState(boolean okStart) {
+            if (okStart && (mMode == STATE_READY || mMode == STATE_LOSE || mMode == STATE_WIN)) {
+                // ready-to-start -> start
+                doStart();
+                return true;
+            } else if (mMode == STATE_PAUSE && okStart) {
+                // paused -> running
+                unpause();
+                return true;
+            }
+            return false;
+        }
+
+        public void setProgress(int progress) {
+            synchronized (mSurfaceHolder) {
+                if (mMode == STATE_RUNNING) {
+                    if (progress == 0)
+                        progress = 1;
+
+                    mDesiredDegrees = (progress * MAXIMUM_LASER_ANGLE) / 100;
+                    if (mDesiredDegrees < MINIMUM_LASER_ANGLE) {
+                        mDesiredDegrees = MINIMUM_LASER_ANGLE;
+                    }
+                    // right/w -> right
+                    if (mDesiredDegrees > MAXIMUM_LASER_ANGLE) {
+                        mDesiredDegrees = MAXIMUM_LASER_ANGLE;
+                    }
+                }
             }
         }
 
@@ -407,6 +463,7 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
                     mFire = false;
                     if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER || keyCode == KeyEvent.KEYCODE_SPACE) {
                         setFiring(false);
+                        useShot();
                         handled = true;
                     } else if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_Q
                             || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT || keyCode == KeyEvent.KEYCODE_W) {
@@ -433,24 +490,29 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
             Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
             paint.setStrokeWidth(2);
             paint.setColor(android.graphics.Color.BLUE);
-            paint.setStyle(Paint.Style.FILL_AND_STROKE);
+            paint.setStyle(Paint.Style.FILL);
             paint.setAntiAlias(true);
 
-            // TODO: generate random map stuff here
             Triangle[] obstacles = {
-                    new Triangle(new Point(1, 80), new Point(mCanvasWidth/2, mCanvasHeight/2), new Point(mCanvasWidth, 80)),
-                    new Triangle(new Point(mCanvasWidth, 40), new Point(mCanvasWidth - 40, 50), new Point(mCanvasWidth,
-                            60)) };
+                    new Triangle(new Point(1, mCanvasHeight - 50), new Point(mCanvasWidth - 100, 100), new Point(1, 1)),
+                    new Triangle(new Point(mCanvasWidth, 150), new Point(150, mCanvasHeight - 100), new Point(
+                            mCanvasWidth, mCanvasHeight - 100)) };
             for (Triangle triangle : obstacles) {
                 triangle.draw(canvas, paint);
             }
             Drawer lineDrawer = new RealDrawer(canvas, mFiringLinePaint, mTargetingLinePaint);
-            LaserCalculator calc = new LaserCalculator(mCanvasWidth, mCanvasHeight, MINIMUM_LASER_ANGLE, MAXIMUM_LASER_ANGLE, obstacles);
+            LaserCalculator calc = new LaserCalculator(mCanvasWidth, mCanvasHeight, MINIMUM_LASER_ANGLE,
+                    MAXIMUM_LASER_ANGLE, obstacles);
             Beam b = calc.fireLaser(mDesiredDegrees);
             lineDrawer.draw(b, mFire);
-            
-            canvas.drawText("Degrees: " + mDesiredDegrees, 50, 50, mFiringLinePaint);
+
+            canvas.drawText("Degrees: " + mDesiredDegrees + "   Shots: " + mShots, 50, 50, mFiringLinePaint);
             canvas.restore();
+
+            Line backWall = new Line(new Point(1, 1), new Point(mCanvasWidth, 1));
+            if (mFire && Intersection.detect(b.lines.get(b.lines.size() - 1), backWall) != null) {
+                win();
+            }
         }
 
     }
@@ -460,6 +522,7 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
 
     /** Pointer to the text view to display "Paused.." etc. */
     private TextView mStatusText;
+    private SeekBar mSeekBar;
 
     /** The thread that actually draws the animation */
     private LaserThread thread;
@@ -504,6 +567,20 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
         return thread.doKeyDown(keyCode, msg);
     }
 
+    public boolean onTouch(View v, MotionEvent event) {
+        
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (!thread.changeState(true)) {
+                thread.fire();
+            }
+        }
+        if (event.getAction() == MotionEvent.ACTION_UP) {
+            thread.setFiring(false);
+            thread.useShot();
+        }
+        return true;
+    }
+
     /**
      * Standard override for key-up. We actually care about these, so we can
      * turn off the engine or stop rotating.
@@ -528,6 +605,11 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
      */
     public void setTextView(TextView textView) {
         mStatusText = textView;
+    }
+
+    public void setSeekBar(SeekBar seekBar) {
+        mSeekBar = seekBar;
+        mSeekBar.setOnSeekBarChangeListener((OnSeekBarChangeListener) this);
     }
 
     /* Callback invoked when the surface dimensions change. */
@@ -563,5 +645,19 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
             } catch (InterruptedException e) {
             }
         }
+    }
+
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromTouch) {
+        thread.setProgress(progress);
+    }
+
+    public void onStartTrackingTouch(SeekBar arg0) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void onStopTrackingTouch(SeekBar arg0) {
+        // TODO Auto-generated method stub
+
     }
 }

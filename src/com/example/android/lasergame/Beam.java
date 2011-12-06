@@ -19,7 +19,7 @@ public class Beam {
     public void addLine(Line l) {
         lines.add(l);
     }
-
+    
     public List<Line> getLines() {
         return lines;
     }
@@ -27,9 +27,12 @@ public class Beam {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
+        sb.append("{ (" + lines.get(0).p1.x + ", " + lines.get(0).p1.y + ")");
         for (Line l : lines) {
-            sb.append(" {(" + l.p1.x + ", " + l.p1.y + ")(" + l.p2.x + ", " + l.p2.y + ")} ");
+            // i figured, no need to show the hard-coded start point
+            sb.append(" (" + l.p2.x + ", " + l.p2.y + ") "); 
         }
+        sb.append("}");
         return sb.toString();
     }
 
