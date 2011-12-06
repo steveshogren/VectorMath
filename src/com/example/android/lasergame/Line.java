@@ -9,6 +9,11 @@ public class Line {
         p2 = pB;
     }
 
+    public Line(int x1, int y1, int x2, int y2) {
+        p1 = new Point(x1, y1);
+        p2 = new Point(x2, y2);
+    }
+
     public String toString() {
         return "{(" + p1.x + ", " + p1.y + ")(" + p2.x + ", " + p2.y + ")}";
     }

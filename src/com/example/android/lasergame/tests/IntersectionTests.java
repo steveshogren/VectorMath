@@ -78,12 +78,38 @@ public class IntersectionTests extends TestCase {
         assertNull("point: " + point, point);
     }
 
-    public void testReflectingOffAt45Degrees() {
+    public void testEdgeDetectorTriangles() {
         Triangle[] t = { new Triangle(new Point(1, 30), new Point(70, 30), new Point(1, 100)) };
-        
-        Intersects l = Intersection.whichEdgeDoesTheLinePassThroughFirst(t, new Line(new Point(50, 100), new Point(50, 0)));
+        Line[] walls = {};
+
+        Intersects l = Intersection.whichEdgeDoesTheLinePassThroughFirst(t, walls, new Line(new Point(50, 100),
+                new Point(50, 0)));
 
         Line e = new Line(new Point(70, 30), new Point(1, 100));
         assertEquals(e, l.edge);
+    }
+
+    public void testEdgeDetectorWalls() {
+        Triangle[] t = {};
+        Line eLine = new Line(0, 0, 100, 0);
+        Line[] walls = { eLine, new Line(0, 0, 0, 100), new Line(100, 0, 100, 100),
+                new Line(0, 100, 100, 100) };
+
+        Intersects a = Intersection.whichEdgeDoesTheLinePassThroughFirst(t, walls, new Line(new Point(50, 99),
+                new Point(50, 0)));
+
+        assertNotNull(a);
+        assertEquals(eLine, a.edge);
+    }
+    public void testEdgeDetectorDoesntCountTheStartPoint() {
+        Triangle[] t = {};
+        Line eLine = new Line(0, 0, 100, 0);
+        Line[] walls = { eLine, new Line(0, 0, 0, 100), new Line(100, 0, 100, 100),
+                new Line(0, 100, 100, 100) };
+
+        Intersects a = Intersection.whichEdgeDoesTheLinePassThroughFirst(t, walls, new Line(new Point(50, 100),
+                new Point(50, 1)));
+
+        assertNull(a);
     }
 }

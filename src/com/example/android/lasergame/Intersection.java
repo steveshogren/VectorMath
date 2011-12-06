@@ -140,38 +140,68 @@ public class Intersection {
         }
     }
 
-    public static Intersects whichEdgeDoesTheLinePassThroughFirst(Triangle[] t, Line line) {
-        for (Triangle triangle : t) {
-            Point i1 = Intersection.detect(line, triangle.edges().get(0));
-            Point i2 = Intersection.detect(line, triangle.edges().get(1));
-            Point i3 = Intersection.detect(line, triangle.edges().get(2));
+    public static Intersects whichEdgeDoesTheLinePassThroughFirst(Triangle[] triangles, Line[] walls, Line laserLine) {
+        Intersection i = new Intersection();
+        List<Intersects> p = new ArrayList<Intersects>();
+        for (Triangle triangle : triangles) {
+            Point i1 = Intersection.detect(laserLine, triangle.edges().get(0));
+            Point i2 = Intersection.detect(laserLine, triangle.edges().get(1));
+            Point i3 = Intersection.detect(laserLine, triangle.edges().get(2));
 
-            Intersection i =  new Intersection();
-            List<Intersects> p = new ArrayList<Intersects>();
             if (i1 != null) {
                 p.add(i.new Intersects(i1, triangle.edges().get(0), triangle));
-            } 
+            }
             if (i2 != null) {
                 p.add(i.new Intersects(i2, triangle.edges().get(1), triangle));
-            } 
+            }
             if (i3 != null) {
                 p.add(i.new Intersects(i3, triangle.edges().get(2), triangle));
             }
-            if (!p.isEmpty()) {
-                Collections.sort(p, new PointComparator(line.p1));
-                return p.get(0);
+        }
+        for (Line wall : walls) {
+            Point i1 = Intersection.detect(laserLine, wall);
+            if (i1 != null) {
+                p.add(i.new Intersects(i1, wall, null)); // is this overloading?
+                                                         // sigh, it is
+            }
+        }
+        if (!p.isEmpty()) {
+            // remove all the Points that equal the "start point"
+            List<Intersects> newList = new ArrayList<Intersects>();
+            for (Intersects intersectPoints : p) {
+                // trying to make the remover a little more fuzzy, getting some
+                // false positives
+                if (! ((intersectPoints.intersectionP.x == laserLine.p1.x
+                        || intersectPoints.intersectionP.x == laserLine.p1.x - 1
+                        || intersectPoints.intersectionP.x == laserLine.p1.x + 1
+                        || intersectPoints.intersectionP.x == laserLine.p1.x + 2 
+                        || intersectPoints.intersectionP.x == laserLine.p1.x - 2)
+                        && (intersectPoints.intersectionP.y == laserLine.p1.y + 2
+                                || intersectPoints.intersectionP.y == laserLine.p1.y - 2
+                                || intersectPoints.intersectionP.y == laserLine.p1.y - 1
+                                || intersectPoints.intersectionP.y == laserLine.p1.y 
+                                || intersectPoints.intersectionP.y == laserLine.p1.y + 1))) {
+                    newList.add(intersectPoints);
+                }
+            }
+            if (!newList.isEmpty()) {
+                Collections.sort(newList, new PointComparator(laserLine.p1));
+                return newList.get(0);
             }
         }
         return null;
     }
+
     public class Intersects {
         public Line edge;
         public Point intersectionP;
         public Triangle triangle;
+
         public Intersects(Point p, Line l) {
             edge = l;
             intersectionP = p;
         }
+
         public Intersects(Point p, Line l, Triangle t) {
             edge = l;
             intersectionP = p;

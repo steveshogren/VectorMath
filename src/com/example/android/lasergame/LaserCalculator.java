@@ -10,8 +10,8 @@ public class LaserCalculator {
     private double mMaxLeftSideDegrees;
     private Triangle[] mTriangles;
     private Beam mBeam;
-	private double mMinimumFiringAngle;
-	private double mMaximumFiringAngle;
+    private double mMinimumFiringAngle;
+    private double mMaximumFiringAngle;
 
     public LaserCalculator(int canvasWidth, int canvasHeight, double minimumFiringAngle, double maximumFiringAngle) {
         mCanvasWidth = canvasWidth;
@@ -21,7 +21,8 @@ public class LaserCalculator {
         mTriangles = new Triangle[] {};
     }
 
-    public LaserCalculator(int canvasWidth, int canvasHeight, double minimumFiringAngle, double maximumFiringAngle, Triangle[] triangles) {
+    public LaserCalculator(int canvasWidth, int canvasHeight, double minimumFiringAngle, double maximumFiringAngle,
+            Triangle[] triangles) {
         mTriangles = triangles;
         mCanvasWidth = canvasWidth;
         mCanvasHeight = canvasHeight;
@@ -74,20 +75,23 @@ public class LaserCalculator {
         return mBeam;
     }
 
-	private void setDesiredDegrees(double desiredDegrees) {
-		mDesiredDegrees = Math.max(desiredDegrees, mMinimumFiringAngle);
+    private void setDesiredDegrees(double desiredDegrees) {
+        mDesiredDegrees = Math.max(desiredDegrees, mMinimumFiringAngle);
         mDesiredDegrees = Math.min(mDesiredDegrees, mMaximumFiringAngle);
-	}
+    }
 
-    private boolean tryToReflect(Line line) {
-        Intersects intersects = Intersection.whichEdgeDoesTheLinePassThroughFirst(mTriangles, line);
-        
+    private boolean tryToReflect(Line incomingLine) {
+        Line[] walls = { new Line(0, 0, 0, mCanvasHeight), new Line(0, 0, mCanvasWidth, 0),
+                new Line(mCanvasWidth, 0, mCanvasWidth, mCanvasHeight),
+                new Line(0, mCanvasHeight, mCanvasWidth, mCanvasHeight) };
+        Intersects intersects = Intersection.whichEdgeDoesTheLinePassThroughFirst(mTriangles, walls, incomingLine);
+
         if (intersects != null) {
             Line l = intersects.edge;
             Point p = intersects.intersectionP;
-            line.p2.x = p.x;
-            line.p2.y = p.y;
-            mBeam.addLine(line);
+            incomingLine.p2.x = p.x;
+            incomingLine.p2.y = p.y;
+            mBeam.addLine(incomingLine);
 
             // start bouncing!!!!
             Vector2 n1 = new Vector2(l.p1.x, l.p1.y);
@@ -97,35 +101,46 @@ public class LaserCalculator {
             Vector2 nNPerp = new Vector2(-lineNorm.y, lineNorm.x);
 
             nN = nNPerp;
-            Vector2 v1 = new Vector2(line.p1.x, line.p1.y);
-            Vector2 v2 = new Vector2(line.p2.x, line.p2.y);
+            Vector2 v1 = new Vector2(incomingLine.p1.x, incomingLine.p1.y);
+            Vector2 v2 = new Vector2(incomingLine.p2.x, incomingLine.p2.y);
             Vector2 vN = v2.sub(v1).nor();
 
             Vector2 u = nN.mul(vN.dot(nN));
             Vector2 w = vN.sub(u);
             Vector2 vPrime = w.sub(u);
-            
-            Line next = new Line(new Point(line.p2.x, line.p2.y), new Point(mCanvasWidth, 0));
-            next.p2.y = (int) (((vPrime.y / vPrime.x) * (mCanvasWidth - line.p2.x)) + line.p2.y);
-       
-            boolean goLeft = false;
-            for (Line tLine : intersects.triangle.edges()) {
-                if (tLine != intersects.edge && Intersection.detect(tLine, next) != null) {
-                    next = new Line(new Point(line.p2.x, line.p2.y), new Point(0, 0));
-                    next.p2.y = (int) (((vPrime.y / vPrime.x) * (0 - line.p2.x)) + line.p2.y);
-                    goLeft = true;
+
+            Line next = new Line(new Point(incomingLine.p2.x, incomingLine.p2.y), new Point(mCanvasWidth, 0));
+            next.p2.y = (int) (((vPrime.y / vPrime.x) * (mCanvasWidth - incomingLine.p2.x)) + incomingLine.p2.y);
+
+            // hitting a wall
+            Intersects nextIntersects = Intersection.whichEdgeDoesTheLinePassThroughFirst(mTriangles, walls, next);
+            if (nextIntersects != null && nextIntersects.triangle == null) { // there's
+                                                                             // that
+                                                                             // overloading
+                // again... sigh
+                if (intersects.edge.p1.x == mCanvasWidth) { // go the other
+                                                            // direction
+                    next = new Line(new Point(incomingLine.p2.x, incomingLine.p2.y), new Point(0, 0));
+                    next.p2.y = (int) (((vPrime.y / vPrime.x) * (0 - incomingLine.p2.x)) + incomingLine.p2.y);
+                }
+            } else {
+                // hitting a triangle
+                if (intersects.triangle != null) {
+                    for (Line tLine : intersects.triangle.edges()) {
+                        if (tLine != intersects.edge && Intersection.detect(tLine, next) != null) {
+                            next = new Line(new Point(incomingLine.p2.x, incomingLine.p2.y), new Point(0, 0));
+                            next.p2.y = (int) (((vPrime.y / vPrime.x) * (0 - incomingLine.p2.x)) + incomingLine.p2.y);
+                        }
+                    }
                 }
             }
-           
-            
-            mBeam.addLine(next);
-            
-//            if (goLeft) {
-//                bounceLeftThenRight(next);
-//            } else {
-//                bounceRightThenLeft(next);
-//            }
-            return true;
+
+            if (next.p2.y <= 0 || next.p2.y > mCanvasHeight) {
+                mBeam.addLine(next);
+                return true;
+            } else {
+                tryToReflect(next);
+            }
         }
         return false;
     }
@@ -155,17 +170,9 @@ public class LaserCalculator {
     }
 
     /**
-     *     x ------------>x
-     *    ******************                                                   
-     *  y *T*              *                                                   
-     *  | *   *            *                                                   
-     *  | *    *           *                                                   
-     *  | *     *          *                                                   
-     *  | *       *        *                                                   
-     *  y *        M*      *                                                   
-     *    ******************
-     * Returns the maximum number of degrees this map supports while still 
-     * hitting the left wall
+     * x ------------>x ****************** y *T* * | * * * | * * * | * * * | * *
+     * * y * M* * ****************** Returns the maximum number of degrees this
+     * map supports while still hitting the left wall
      */
     private double getMaxLeftSideDegrees(Point startPoint) {
         double T = Math.atan2(startPoint.x, startPoint.y) * 180.0F / Math.PI;
