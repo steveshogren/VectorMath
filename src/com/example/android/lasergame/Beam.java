@@ -28,7 +28,7 @@ public class Beam {
         StringBuilder sb = new StringBuilder();
 
         for (Line l : lines) {
-            sb.append(" {(" + l.p1.x + ", " + l.p1.y + ")(" + l.p2.x + ", " + l.p2.y + ")} ");
+            sb.append(" {(" + l.p1.x + ", " + l.p1.y + ")(" + l.p2.x + ", " + l.p2.y + ")}\n ");
         }
         return sb.toString();
     }

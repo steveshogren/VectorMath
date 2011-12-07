@@ -437,10 +437,10 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
             paint.setAntiAlias(true);
 
             // TODO: generate random map stuff here
-            Triangle[] obstacles = {
-                    new Triangle(new Point(1, 80), new Point(mCanvasWidth/2, mCanvasHeight/2), new Point(mCanvasWidth, 80)),
-                    new Triangle(new Point(mCanvasWidth, 40), new Point(mCanvasWidth - 40, 50), new Point(mCanvasWidth,
-                            60)) };
+            Triangle[] obstacles = {};
+//                    new Triangle(new Point(1, 80), new Point(mCanvasWidth/2, mCanvasHeight/2), new Point(mCanvasWidth, 80)),
+//                    new Triangle(new Point(mCanvasWidth, 40), new Point(mCanvasWidth - 40, 50), new Point(mCanvasWidth,
+//                            60)) };
             for (Triangle triangle : obstacles) {
                 triangle.draw(canvas, paint);
             }
