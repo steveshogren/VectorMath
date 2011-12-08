@@ -4,7 +4,6 @@ import com.example.android.lasergame.Beam;
 import com.example.android.lasergame.LaserCalculator;
 import com.example.android.lasergame.Line;
 import com.example.android.lasergame.Point;
-import com.example.android.lasergame.Triangle;
 
 import junit.framework.TestCase;
 public class LaserCalculatorWallOnlyTests extends TestCase {
@@ -34,7 +33,7 @@ public class LaserCalculatorWallOnlyTests extends TestCase {
     public void test35Degrees() {
         Beam b = mCalc.fireLaser(35);
         Beam e = new Beam(new Line(new Point(50, 100), new Point(0, 64)));
-        e.addLine(new Line(new Point(0, 64), new Point(91, 0)));
+        e.addLine(new Line(new Point(0, 64), new Point(88, 0)));
         assertEquals(e, b);
     }
 
@@ -50,7 +49,7 @@ public class LaserCalculatorWallOnlyTests extends TestCase {
         e.addLine(new Line(new Point(0, 35), new Point(100, 25)));
         e.addLine(new Line(new Point(100, 25), new Point(0, 15)));
         e.addLine(new Line(new Point(0, 15), new Point(100, 5)));
-        e.addLine(new Line(new Point(100, 5), new Point(5, 0)));
+        e.addLine(new Line(new Point(100, 5), new Point(50, 0)));
         assertEquals(e, b);
     }
 
@@ -66,14 +65,14 @@ public class LaserCalculatorWallOnlyTests extends TestCase {
         e.addLine(new Line(new Point(0, 35), new Point(100, 25)));
         e.addLine(new Line(new Point(100, 25), new Point(0, 15)));
         e.addLine(new Line(new Point(0, 15), new Point(100, 5)));
-        e.addLine(new Line(new Point(100, 5), new Point(99, 0)));
+        e.addLine(new Line(new Point(100, 5), new Point(50, 0)));
         assertEquals(e, b);
     }
 
     public void testLastHittingTheLeftWall() {
         Beam b = mCalc.fireLaser(63);
         Beam e = new Beam(new Line(new Point(50, 100), new Point(0, 1)));
-        e.addLine(new Line(new Point(0, 1), new Point(1, 0)));
+        e.addLine(new Line(new Point(0, 1), new Point(0, 0)));
         assertEquals(e, b);
     }
 
@@ -98,7 +97,7 @@ public class LaserCalculatorWallOnlyTests extends TestCase {
     public void testFirstHittingTheRightWall() {
         Beam b = mCalc.fireLaser(118);
         Beam e = new Beam(new Line(new Point(50, 100), new Point(100, 5)));
-        e.addLine(new Line(new Point(100, 5), new Point(90, 0)));
+        e.addLine(new Line(new Point(100, 5), new Point(97, 0)));
         assertEquals(e, b);
     }
 
@@ -114,7 +113,7 @@ public class LaserCalculatorWallOnlyTests extends TestCase {
         e.addLine(new Line(new Point(100, 35), new Point(0, 25)));
         e.addLine(new Line(new Point(0, 25), new Point(100, 15)));
         e.addLine(new Line(new Point(100, 15), new Point(0, 5)));
-        e.addLine(new Line(new Point(0, 5), new Point(100, 0)));
+        e.addLine(new Line(new Point(0, 5), new Point(50, 0)));
         assertEquals(e, b);
     }
 
@@ -130,7 +129,7 @@ public class LaserCalculatorWallOnlyTests extends TestCase {
         e.addLine(new Line(new Point(100, 35), new Point(0, 25)));
         e.addLine(new Line(new Point(0, 25), new Point(100, 15)));
         e.addLine(new Line(new Point(100, 15), new Point(0, 5)));
-        e.addLine(new Line(new Point(0, 5), new Point(0, 0)));
+        e.addLine(new Line(new Point(0, 5), new Point(50, 0)));
         assertEquals(e, b);
     }
 }

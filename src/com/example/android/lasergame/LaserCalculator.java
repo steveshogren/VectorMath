@@ -39,10 +39,7 @@ public class LaserCalculator {
         mMaxLeftSideDegrees = getMaxLeftSideDegrees(firstLine.p1);
         if (hittingLeftWall()) {
             firstLine.p2.y = (int) (mCanvasHeight - Math.tan(Math.toRadians(mDesiredDegrees)) * firstLine.p1.x);
-            if (!tryToReflect(firstLine)) {
-//                mBeam.addLine(firstLine);
-//                bounceRightThenLeft(firstLine);
-            }
+            startReflecting(firstLine);
         } else if (hittingBackWall()) {
             if (firingStraightUp()) {
                 firstLine.p2.y = 0;
@@ -52,25 +49,16 @@ public class LaserCalculator {
             } else if (hittingLeftSideOfBackWall()) {
                 firstLine.p2.x = (int) (firstLine.p1.x - Math.tan(Math.toRadians(180 - 90 - mDesiredDegrees))
                         * mCanvasHeight);
-                if (!tryToReflect(firstLine)) {
-//                    mBeam.addLine(firstLine);
-//                    return mBeam;
-                }
+                startReflecting(firstLine);
             } else { // hitting right side...
                 firstLine.p2.x = (int) (firstLine.p1.x + Math.tan(Math.toRadians(mDesiredDegrees - 90)) * mCanvasHeight);
-                if (!tryToReflect(firstLine)) {
-//                    mBeam.addLine(firstLine);
-//                    return mBeam;
-                }
+                startReflecting(firstLine);
             }
         } else { // hitting right wall
             firstLine.p2.x = mCanvasWidth;
             mDesiredDegrees = 180 - mDesiredDegrees;
             firstLine.p2.y = (int) (mCanvasHeight - Math.tan(Math.toRadians(mDesiredDegrees)) * firstLine.p1.x);
-            if (!tryToReflect(firstLine)) {
-//                mBeam.addLine(firstLine);
-//                bounceLeftThenRight(firstLine);
-            }
+            startReflecting(firstLine);
         }
         return mBeam;
     }
@@ -80,13 +68,13 @@ public class LaserCalculator {
         mDesiredDegrees = Math.min(mDesiredDegrees, mMaximumFiringAngle);
     }
 
-    private boolean tryToReflect(Line incomingLine) {
+    private void startReflecting(Line incomingLine) {
         Line[] walls = { new Line(0, 0, 0, mCanvasHeight), new Line(0, 0, mCanvasWidth, 0),
                 new Line(mCanvasWidth, 0, mCanvasWidth, mCanvasHeight),
                 new Line(0, mCanvasHeight, mCanvasWidth, mCanvasHeight) };
         Intersects intersects = Intersection.whichEdgeDoesTheLinePassThroughFirst(mTriangles, walls, incomingLine);
 
-        if (intersects != null) {
+        if (intersects != null) { // it has to intersect with SOMETHING
             Line intersectsWithLine = intersects.edge;
             Point intersectionPoint = intersects.intersectionP;
             incomingLine.p2.x = intersectionPoint.x;
@@ -112,21 +100,17 @@ public class LaserCalculator {
             Line next = new Line(new Point(incomingLine.p2.x, incomingLine.p2.y), new Point(mCanvasWidth, 0));
             next.p2.y = (int) (((vPrime.y / vPrime.x) * (mCanvasWidth - incomingLine.p2.x)) + incomingLine.p2.y);
 
-            // hitting a wall
             Intersects nextIntersects = Intersection.whichEdgeDoesTheLinePassThroughFirst(mTriangles, walls, next);
-            if (nextIntersects == null || (nextIntersects != null && nextIntersects.triangle == null)) { // there's
-                // that
-                // overloading
-                // again... sigh
-                if (intersects.intersectionP.x == mCanvasWidth) { // go the
-                                                                  // other
-                    // direction
+            if (hittingAWall(nextIntersects)) { 
+                if (intersects.intersectionP.x == mCanvasWidth) { 
                     next = new Line(new Point(incomingLine.p2.x, incomingLine.p2.y), new Point(0, 0));
+                    // y = m(x-x1)+y1 
                     next.p2.y = (int) (((vPrime.y / vPrime.x) * (0 - incomingLine.p2.x)) + incomingLine.p2.y);
                 }
                 if (next.p2.y < 0) {
                     next.p2.y = 0;
-                    next.p2.x = (int) (((vPrime.y / vPrime.x) * (0 - incomingLine.p2.y)) + incomingLine.p2.x);
+                    // x = ((y - y1)/m) + x1 
+                    next.p2.x = (int) ((0 - incomingLine.p2.y)/ (vPrime.y / vPrime.x) + incomingLine.p2.x);
                 }
             } else {
                 // hitting a triangle
@@ -142,28 +126,16 @@ public class LaserCalculator {
 
             if (next.p2.y <= 0 || next.p2.y > mCanvasHeight) {
                 mBeam.addLine(next);
-                return true;
+                return;
             } else {
-                tryToReflect(next);
+                startReflecting(next);
             }
         }
-        return false;
+        return;
     }
 
-    private void bounceLeftThenRight(Line line) {
-        double nextAngle = 180 - (mDesiredDegrees + 90);
-        // -----Heading left ----
-        Line l2 = new Line(new Point(line.p2.x, line.p2.y), new Point(0, 0));
-
-        l2.p2.y = (int) (l2.p1.y - (float) (Math.tan(Math.toRadians(mDesiredDegrees)) * l2.p1.x));
-        if (l2.p2.y > 0) { // left wall
-            mBeam.addLine(l2);
-            bounceRightThenLeft(l2);
-        } else { // back wall
-            l2.p2.y = 0;
-            l2.p2.x = (int) (mCanvasWidth - Math.tan(Math.toRadians(nextAngle)) * l2.p1.y);
-            mBeam.addLine(l2);
-        }
+    private boolean hittingAWall(Intersects nextIntersects) {
+        return nextIntersects == null || (nextIntersects != null && nextIntersects.triangle == null);
     }
 
     private boolean hittingLeftSideOfBackWall() {
@@ -191,21 +163,5 @@ public class LaserCalculator {
 
     private boolean hittingLeftWall() {
         return mDesiredDegrees < mMaxLeftSideDegrees;
-    }
-
-    private void bounceRightThenLeft(Line line) {
-        Line l2 = new Line(new Point(line.p2.x, line.p2.y), new Point(0, 0));
-
-        // -----Heading right ---
-        double nextAngle = 180 - (mDesiredDegrees + 90);
-        l2.p2.x = (int) (Math.tan(Math.toRadians(nextAngle)) * l2.p1.y);
-        if (l2.p2.x < mCanvasWidth) { // hitting back wall
-            mBeam.addLine(l2);
-        } else { // bounce off right wall
-            l2.p2.x = mCanvasWidth;
-            l2.p2.y = (int) (l2.p1.y - (float) (Math.tan(Math.toRadians(mDesiredDegrees)) * mCanvasWidth));
-            mBeam.addLine(l2);
-            bounceLeftThenRight(l2);
-        }
     }
 }
