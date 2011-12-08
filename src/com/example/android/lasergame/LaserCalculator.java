@@ -79,6 +79,12 @@ public class LaserCalculator {
             Point intersectionPoint = intersects.intersectionP;
             incomingLine.p2.x = intersectionPoint.x;
             incomingLine.p2.y = intersectionPoint.y;
+            if (mBeam.lines.size() > 0 
+                    && incomingLine.p1.equals(mBeam.lines.get(mBeam.lines.size()-1).p2) 
+                    && incomingLine.p2.equals(mBeam.lines.get(mBeam.lines.size()-1).p1)) {
+            // return if "backtracking" here
+               return; 
+            }
             mBeam.addLine(incomingLine);
 
             // start bouncing!!!!
