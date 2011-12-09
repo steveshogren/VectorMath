@@ -450,6 +450,7 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback {
             lineDrawer.draw(b, mFire);
             
             canvas.drawText("Degrees: " + mDesiredDegrees, 50, 50, mFiringLinePaint);
+//            canvas.drawText("h: " + mCanvasHeight + "w: " + mCanvasWidth, 100, 100, mFiringLinePaint);
             canvas.restore();
         }
 
