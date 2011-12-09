@@ -34,7 +34,7 @@ public class LaserCalculator {
         setDesiredDegrees(desiredDegrees);
 
         mBeam = new Beam();
-        Line firstLine = new Line(new Point(mCanvasWidth / 2, mCanvasHeight), new Point(0, 0));
+        Line firstLine = new Line(new Point(mCanvasWidth / 2, mCanvasHeight), new Point(1, 1));
 
         mMaxLeftSideDegrees = getMaxLeftSideDegrees(firstLine.p1);
         if (hittingLeftWall()) {
@@ -42,7 +42,7 @@ public class LaserCalculator {
             startReflecting(firstLine);
         } else if (hittingBackWall()) {
             if (firingStraightUp()) {
-                firstLine.p2.y = 0;
+                firstLine.p2.y = 1;
                 firstLine.p2.x = firstLine.p1.x;
                 mBeam.addLine(firstLine);
                 return mBeam;
@@ -69,9 +69,9 @@ public class LaserCalculator {
     }
 
     private void startReflecting(Line incomingLine) {
-        Line[] walls = { new Line(0, 0, 0, mCanvasHeight), new Line(0, 0, mCanvasWidth, 0),
-                new Line(mCanvasWidth, 0, mCanvasWidth, mCanvasHeight),
-                new Line(0, mCanvasHeight, mCanvasWidth, mCanvasHeight) };
+        Line[] walls = { new Line(1, 1, 1, mCanvasHeight), new Line(1, 1, mCanvasWidth, 1),
+                new Line(mCanvasWidth, 1, mCanvasWidth, mCanvasHeight),
+                new Line(1, mCanvasHeight, mCanvasWidth, mCanvasHeight) };
         Intersects intersects = Intersection.whichEdgeDoesTheLinePassThroughFirst(mTriangles, walls, incomingLine);
 
         if (intersects != null) { // it has to intersect with SOMETHING
@@ -85,7 +85,7 @@ public class LaserCalculator {
                 return;
             }
             mBeam.addLine(incomingLine);
-            if (incomingLine.p2.y <= 0 || incomingLine.p2.y > mCanvasHeight) {
+            if (incomingLine.p2.y <= 1 || incomingLine.p2.y >= mCanvasHeight) {
                 return;
             }
 
@@ -105,47 +105,47 @@ public class LaserCalculator {
             Vector2 w = vN.sub(u);
             Vector2 vPrime = w.sub(u);
 
-            Line next = new Line(new Point(incomingLine.p2.x, incomingLine.p2.y), new Point(mCanvasWidth, 0));
+            Line next = new Line(new Point(incomingLine.p2.x, incomingLine.p2.y), new Point(mCanvasWidth, 1));
             next.p2.y = (int) (((vPrime.y / vPrime.x) * (mCanvasWidth - incomingLine.p2.x)) + incomingLine.p2.y);
 
             Intersects nextIntersects = Intersection.whichEdgeDoesTheLinePassThroughFirst(mTriangles, walls, next);
             if (hittingAWall(nextIntersects)) {
+                if (nextIntersects != null) {
+                    next.p2 = nextIntersects.intersectionP;
+                } else {
+                    
                 if (intersects.intersectionP.x == mCanvasWidth) {
-                    next = new Line(new Point(incomingLine.p2.x, incomingLine.p2.y), new Point(0, 0));
+                    next = new Line(new Point(incomingLine.p2.x, incomingLine.p2.y), new Point(1, 1));
                     // y = m(x-x1)+y1
-                    next.p2.y = (int) (((vPrime.y / vPrime.x) * (0 - incomingLine.p2.x)) + incomingLine.p2.y);
+                    next.p2.y = (int) (((vPrime.y / vPrime.x) * (1 - incomingLine.p2.x)) + incomingLine.p2.y);
                 }
-                if (next.p2.y < 0) {
-                    next.p2.y = 0;
+                if (next.p2.y < 1) {
+                    next.p2.y = 1;
                     // x = ((y - y1)/m) + x1
-                    next.p2.x = (int) ((0 - incomingLine.p2.y) / (vPrime.y / vPrime.x) + incomingLine.p2.x);
+                    next.p2.x = (int) ((1 - incomingLine.p2.y) / (vPrime.y / vPrime.x) + incomingLine.p2.x);
                 }
                 if (next.p2.y > mCanvasHeight) {
                     next.p2.y = mCanvasHeight;
-                    next.p2.x = (int) ((0 - incomingLine.p2.y) / (vPrime.y / vPrime.x) + incomingLine.p2.x);
+                    next.p2.x = (int) ((1 - incomingLine.p2.y) / (vPrime.y / vPrime.x) + incomingLine.p2.x);
                 }
                 Intersects nextIntersects2 = Intersection.whichEdgeDoesTheLinePassThroughFirst(mTriangles, walls, next);
                 if (nextIntersects2 != null) {
                     next.p2 = nextIntersects2.intersectionP;
+                }
                 }
             } else {
                 // hitting a triangle
                 if (intersects.triangle != null) {
                     for (Line tLine : intersects.triangle.edges()) {
                         if (tLine != intersects.edge && Intersection.detect(tLine, next) != null) {
-                            next = new Line(new Point(incomingLine.p2.x, incomingLine.p2.y), new Point(0, 0));
-                            next.p2.y = (int) (((vPrime.y / vPrime.x) * (0 - incomingLine.p2.x)) + incomingLine.p2.y);
+                            next = new Line(new Point(incomingLine.p2.x, incomingLine.p2.y), new Point(1, 1));
+                            next.p2.y = (int) (((vPrime.y / vPrime.x) * (1 - incomingLine.p2.x)) + incomingLine.p2.y);
                         }
                     }
                 }
             }
 
-            // if (next.p2.y <= 0 || next.p2.y > mCanvasHeight) {
-            // mBeam.addLine(next);
-            // return;
-            // } else {
             startReflecting(next);
-            // }
         }
         return;
     }

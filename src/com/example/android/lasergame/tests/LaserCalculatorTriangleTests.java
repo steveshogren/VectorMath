@@ -6,8 +6,7 @@ import com.example.android.lasergame.Line;
 import com.example.android.lasergame.Point;
 import com.example.android.lasergame.Triangle;
 
-import junit.framework.TestCase;
-public class LaserCalculatorTriangleTests extends TestCase {
+public class LaserCalculatorTriangleTests extends TestBase {
     private LaserCalculator mCalc;
 
     public void setUp() {
@@ -21,10 +20,10 @@ public class LaserCalculatorTriangleTests extends TestCase {
         Beam b = mCalc.fireLaser(118);
         Beam e = new Beam();
         e.addLine(new Line(new Point(160, 508), new Point(320, 207)));
-        e.addLine(new Line(new Point(320, 207), new Point(276, 127)));
-        e.addLine(new Line(new Point(276, 127), new Point(320, 146)));
-        e.addLine(new Line(new Point(320, 146), new Point(220, 188)));
-        e.addLine(new Line(new Point(220, 188), new Point(0, 865)));
+        e.addLine(new Line(new Point(320, 207), new Point(277, 126)));
+        e.addLine(new Line(new Point(277, 126), new Point(320, 144)));
+        e.addLine(new Line(new Point(320, 144), new Point(226, 182)));
+        e.addLine(new Line(new Point(226, 182), new Point(124, 508)));
         assertEquals(e, b);
     }
 
@@ -34,7 +33,10 @@ public class LaserCalculatorTriangleTests extends TestCase {
 
         Beam b = mCalc.fireLaser(47);
         Beam e = new Beam();
-        e.addLine(new Line(new Point(160, 508), new Point(0, 336)));
+        e.addLine(new Line(new Point(160, 508), new Point(1, 336)));
+        e.addLine(new Line(new Point(1, 336), new Point(118, 208)));
+        e.addLine(new Line(new Point(118, 208), new Point(1, 297)));
+        e.addLine(new Line(new Point(1, 297), new Point(279, 508)));
         assertEquals(e, b);
     }
 
@@ -47,7 +49,7 @@ public class LaserCalculatorTriangleTests extends TestCase {
         e.addLine(new Line(new Point(50, 100), new Point(50, 49)));
         e.addLine(new Line(new Point(50, 49), new Point(100, 48)));
         e.addLine(new Line(new Point(100, 48), new Point(53, 47)));
-        e.addLine(new Line(new Point(53, 47), new Point(51, 100)));
+        e.addLine(new Line(new Point(53, 47), new Point(54, 100)));
         assertEquals(e, b);
     }
     
@@ -61,7 +63,7 @@ public class LaserCalculatorTriangleTests extends TestCase {
         e.addLine(new Line(new Point(50, 100), new Point(51, 48)));
         e.addLine(new Line(new Point(51, 48), new Point(100, 46)));
         e.addLine(new Line(new Point(100, 46), new Point(57, 43)));
-        e.addLine(new Line(new Point(57, 43), new Point(53, 100)));
+        e.addLine(new Line(new Point(57, 43), new Point(61, 100)));
         assertEquals(e, b);
     }
 
@@ -72,7 +74,7 @@ public class LaserCalculatorTriangleTests extends TestCase {
         Beam b = mCalc.fireLaser(91);
         Beam e = new Beam();
         e.addLine(new Line(new Point(50, 100), new Point(50, 50)));
-        e.addLine(new Line(new Point(50, 50), new Point(0, 50)));
+        e.addLine(new Line(new Point(50, 50), new Point(1, 50)));
         assertEquals(e, b);
     }
 
