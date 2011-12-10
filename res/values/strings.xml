@@ -15,7 +15,7 @@
 -->
 
 <resources>
-	<string name="app_name">Lunar Lander</string>
+	<string name="app_name">Laser Game</string>
 	
     <string name="menu_start">Start</string>
     <string name="menu_stop">Stop</string>
