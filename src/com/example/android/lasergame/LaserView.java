@@ -157,6 +157,7 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback, SeekBar.O
          */
         public void doStart() {
             synchronized (mSurfaceHolder) {
+                mFire = false;
                 mShots = 4;
                 mDesiredDegrees = 5;
                 setState(STATE_RUNNING);
@@ -231,6 +232,9 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback, SeekBar.O
          */
         public void setFiring(boolean firing) {
             synchronized (mSurfaceHolder) {
+                if (mMode == STATE_WIN) {
+                    firing = true;
+                }
                 mFire = firing;
             }
         }
@@ -279,6 +283,7 @@ class LaserView extends SurfaceView implements SurfaceHolder.Callback, SeekBar.O
          */
         public void setState(int mode) {
             synchronized (mSurfaceHolder) {
+                mFire = true;
                 setState(mode, null);
             }
         }
