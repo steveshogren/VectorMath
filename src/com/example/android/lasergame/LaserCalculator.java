@@ -39,7 +39,7 @@ public class LaserCalculator {
         mMaxLeftSideDegrees = getMaxLeftSideDegrees(firstLine.p1);
         if (hittingLeftWall()) {
             firstLine.p2.y = (int) (mCanvasHeight - Math.tan(Math.toRadians(mDesiredDegrees)) * firstLine.p1.x);
-            startReflecting(firstLine);
+            reflect(firstLine);
         } else if (hittingBackWall()) {
             if (firingStraightUp()) {
                 firstLine.p2.y = 1;
@@ -49,16 +49,16 @@ public class LaserCalculator {
             } else if (hittingLeftSideOfBackWall()) {
                 firstLine.p2.x = (int) (firstLine.p1.x - Math.tan(Math.toRadians(180 - 90 - mDesiredDegrees))
                         * mCanvasHeight);
-                startReflecting(firstLine);
+                reflect(firstLine);
             } else { // hitting right side...
                 firstLine.p2.x = (int) (firstLine.p1.x + Math.tan(Math.toRadians(mDesiredDegrees - 90)) * mCanvasHeight);
-                startReflecting(firstLine);
+                reflect(firstLine);
             }
         } else { // hitting right wall
             firstLine.p2.x = mCanvasWidth;
             mDesiredDegrees = 180 - mDesiredDegrees;
             firstLine.p2.y = (int) (mCanvasHeight - Math.tan(Math.toRadians(mDesiredDegrees)) * firstLine.p1.x);
-            startReflecting(firstLine);
+            reflect(firstLine);
         }
         return mBeam;
     }
@@ -68,17 +68,15 @@ public class LaserCalculator {
         mDesiredDegrees = Math.min(mDesiredDegrees, mMaximumFiringAngle);
     }
 
-    private void startReflecting(Line incomingLine) {
+    private void reflect(Line incomingLine) {
         Line[] walls = { new Line(1, 1, 1, mCanvasHeight), new Line(1, 1, mCanvasWidth, 1),
                 new Line(mCanvasWidth, 1, mCanvasWidth, mCanvasHeight),
                 new Line(1, mCanvasHeight, mCanvasWidth, mCanvasHeight) };
         Intersects intersects = Intersection.whichEdgeDoesTheLinePassThroughFirst(mTriangles, walls, incomingLine);
 
         if (intersects != null) { // it has to intersect with SOMETHING
-            Line intersectsWithLine = intersects.edge;
-            Point intersectionPoint = intersects.intersectionP;
-            incomingLine.p2.x = intersectionPoint.x;
-            incomingLine.p2.y = intersectionPoint.y;
+            incomingLine.p2.x = intersects.intersectionP.x;
+            incomingLine.p2.y = intersects.intersectionP.y;
             if (mBeam.lines.size() > 0 && incomingLine.p1.equals(mBeam.lines.get(mBeam.lines.size() - 1).p2)
                     && incomingLine.p2.equals(mBeam.lines.get(mBeam.lines.size() - 1).p1)) {
                 // return if "backtracking" here
@@ -90,48 +88,42 @@ public class LaserCalculator {
             }
 
             // start bouncing!!!!
-            Vector2 n1 = new Vector2(intersectsWithLine.p1.x, intersectsWithLine.p1.y);
-            Vector2 n2 = new Vector2(intersectsWithLine.p2.x, intersectsWithLine.p2.y);
-            Vector2 nN = n1.add(n2).nor();
-            Vector2 lineNorm = n1.sub(n2).nor();
-            Vector2 nNPerp = new Vector2(-lineNorm.y, lineNorm.x);
-
-            nN = nNPerp;
-            Vector2 v1 = new Vector2(incomingLine.p1.x, incomingLine.p1.y);
-            Vector2 v2 = new Vector2(incomingLine.p2.x, incomingLine.p2.y);
-            Vector2 vN = v2.sub(v1).nor();
-
-            Vector2 u = nN.mul(vN.dot(nN));
-            Vector2 w = vN.sub(u);
-            Vector2 vPrime = w.sub(u);
+            Vector2 vPrime = findVPrime(incomingLine, intersects.edge);
 
             Line next = new Line(new Point(incomingLine.p2.x, incomingLine.p2.y), new Point(mCanvasWidth, 1));
-            next.p2.y = (int) (((vPrime.y / vPrime.x) * (mCanvasWidth - incomingLine.p2.x)) + incomingLine.p2.y);
+            // x = ((y - y1)/m) + x1
+            if (vPrime.x > 0) {
+                next.p2.y = (int) (((vPrime.y / vPrime.x) * (mCanvasWidth - incomingLine.p2.x)) + incomingLine.p2.y);
+            } else {
+                next.p2.x = 1;
+                next.p2.y = (int) (((vPrime.y / vPrime.x) * (1 - incomingLine.p2.x)) + incomingLine.p2.y);
+            }
 
             Intersects nextIntersects = Intersection.whichEdgeDoesTheLinePassThroughFirst(mTriangles, walls, next);
             if (hittingAWall(nextIntersects)) {
                 if (nextIntersects != null) {
                     next.p2 = nextIntersects.intersectionP;
                 } else {
-                    
-                if (intersects.intersectionP.x == mCanvasWidth) {
-                    next = new Line(new Point(incomingLine.p2.x, incomingLine.p2.y), new Point(1, 1));
-                    // y = m(x-x1)+y1
-                    next.p2.y = (int) (((vPrime.y / vPrime.x) * (1 - incomingLine.p2.x)) + incomingLine.p2.y);
-                }
-                if (next.p2.y < 1) {
-                    next.p2.y = 1;
-                    // x = ((y - y1)/m) + x1
-                    next.p2.x = (int) ((1 - incomingLine.p2.y) / (vPrime.y / vPrime.x) + incomingLine.p2.x);
-                }
-                if (next.p2.y > mCanvasHeight) {
-                    next.p2.y = mCanvasHeight;
-                    next.p2.x = (int) ((1 - incomingLine.p2.y) / (vPrime.y / vPrime.x) + incomingLine.p2.x);
-                }
-                Intersects nextIntersects2 = Intersection.whichEdgeDoesTheLinePassThroughFirst(mTriangles, walls, next);
-                if (nextIntersects2 != null) {
-                    next.p2 = nextIntersects2.intersectionP;
-                }
+                    if (intersects.intersectionP.x == mCanvasWidth) {
+                        next = new Line(new Point(incomingLine.p2.x, incomingLine.p2.y), new Point(1, 1));
+                        // y = m(x-x1)+y1
+                        next.p2.y = (int) (((vPrime.y / vPrime.x) * (1 - incomingLine.p2.x)) + incomingLine.p2.y);
+                    }
+                    if (next.p2.y < 1) {
+                        next.p2.y = 1;
+                        // x = ((y - y1)/m) + x1
+                        next.p2.x = (int) ((1 - incomingLine.p2.y) / (vPrime.y / vPrime.x) + incomingLine.p2.x);
+                    }
+                    if (next.p2.y > mCanvasHeight) {
+                        next.p2.y = mCanvasHeight;
+                        // x = ((y - y1)/m) + x1
+                        next.p2.x = (int) ((1 - incomingLine.p2.y) / (vPrime.y / vPrime.x) + incomingLine.p2.x);
+                    }
+                    Intersects nextIntersects2 = Intersection.whichEdgeDoesTheLinePassThroughFirst(mTriangles, walls,
+                            next);
+                    if (nextIntersects2 != null) {
+                        next.p2 = nextIntersects2.intersectionP;
+                    }
                 }
             } else {
                 // hitting a triangle
@@ -145,9 +137,27 @@ public class LaserCalculator {
                 }
             }
 
-            startReflecting(next);
+            reflect(next);
         }
         return;
+    }
+
+    private Vector2 findVPrime(Line incomingLine, Line intersectsWithLine) {
+        Vector2 n1 = new Vector2(intersectsWithLine.p1.x, intersectsWithLine.p1.y);
+        Vector2 n2 = new Vector2(intersectsWithLine.p2.x, intersectsWithLine.p2.y);
+        Vector2 nN = n1.add(n2).nor();
+        Vector2 lineNorm = n1.sub(n2).nor();
+        Vector2 nNPerp = new Vector2(-lineNorm.y, lineNorm.x);
+
+        nN = nNPerp;
+        Vector2 v1 = new Vector2(incomingLine.p1.x, incomingLine.p1.y);
+        Vector2 v2 = new Vector2(incomingLine.p2.x, incomingLine.p2.y);
+        Vector2 vN = v2.sub(v1).nor();
+
+        Vector2 u = nN.mul(vN.dot(nN));
+        Vector2 w = vN.sub(u);
+        Vector2 vPrime = w.sub(u);
+        return vPrime;
     }
 
     private boolean hittingAWall(Intersects nextIntersects) {
